@@ -13,16 +13,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authService = void 0;
-const db_1 = require("../repositories/db");
 const uuid_1 = require("uuid");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const token_service_1 = require("./token-service");
+const users_db_repositories_1 = require("../repositories/users-db-repositories");
+const api_error_1 = __importDefault(require("../exceptions/api-error"));
+const auth_db_repositories_1 = require("../repositories/auth-db-repositories");
 exports.authService = {
     registration(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
-            const candidate = yield db_1.UsersCollection.findOne({ email });
+            const candidate = yield users_db_repositories_1.UsersRepositories.getUser({ email });
             if (candidate) {
-                throw new Error(`Пользователь с почтовым адресом ${email} уже существует`);
+                throw api_error_1.default.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`);
             }
             const hashPassword = yield bcrypt_1.default.hash(password, 3);
             const activationLink = (0, uuid_1.v4)();
@@ -33,47 +35,63 @@ exports.authService = {
                 password: hashPassword,
                 isActivated: false
             };
-            const user = yield db_1.UsersCollection.insertOne(body);
+            yield auth_db_repositories_1.AuthDBRepositories.registration(body);
             const payload = { id: body.id, email, isActivated: body.isActivated };
             const tokens = token_service_1.tokenService.generationTokens(payload);
-            yield token_service_1.tokenService.saveToken(body.id, tokens.refreshToken);
+            yield token_service_1.tokenService.saveToken(payload.id, tokens.refreshToken);
             // const res = await mailService.sendActivationMail(email, `${process.env.API_URL}/activate/${activationLink}`)
+            return Object.assign(Object.assign({}, tokens), { user: Object.assign({}, payload) });
+            return {};
+        });
+    },
+    login(email, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield users_db_repositories_1.UsersRepositories.getUser({ email });
+            if (!user) {
+                throw api_error_1.default.BadRequest(`Пользователь с таким ${email} не найден`);
+            }
+            const isPassEquals = yield bcrypt_1.default.compare(password, user.password);
+            if (!isPassEquals) {
+                throw api_error_1.default.BadRequest(`Неверный пароль`);
+            }
+            const payload = { id: user.id, email, isActivated: user.isActivated };
+            const tokens = token_service_1.tokenService.generationTokens(Object.assign({}, payload));
+            yield token_service_1.tokenService.saveToken(payload.id, tokens.refreshToken);
             return Object.assign(Object.assign({}, tokens), { user: Object.assign({}, payload) });
         });
     },
-    login(req, res, next) {
+    logout(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-            }
-            catch (e) {
-                console.log(e);
-            }
+            const token = yield token_service_1.tokenService.removeToken(refreshToken);
+            return token;
         });
     },
-    logout(req, res, next) {
+    activate() {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-            }
-            catch (e) {
-                console.log(e);
-            }
         });
     },
-    activate(req, res, next) {
+    refresh(refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
+            if (!refreshToken) {
+                throw api_error_1.default.UnauthorizedError();
             }
-            catch (e) {
-                console.log(e);
-            }
-        });
-    },
-    refresh(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-            }
-            catch (e) {
-                console.log(e);
+            const userData = token_service_1.tokenService.validateRefreshToken(refreshToken);
+            if (userData) {
+                const user = yield users_db_repositories_1.UsersRepositories.getUser({ id: userData.id });
+                const tokenFromDB = yield token_service_1.tokenService.findToken(refreshToken);
+                if (!userData || !tokenFromDB) {
+                    throw api_error_1.default.UnauthorizedError();
+                }
+                if (user) {
+                    const payload = { id: user.id, email: user.email, isActivated: user.isActivated };
+                    yield token_service_1.tokenService.removeToken(refreshToken);
+                    const tokens = token_service_1.tokenService.generationTokens(payload);
+                    yield token_service_1.tokenService.saveToken(payload.id, tokens.refreshToken);
+                    return Object.assign(Object.assign({}, tokens), { user: Object.assign({}, payload) });
+                }
+                else {
+                    throw api_error_1.default.BadRequest("Непонятная ошибка");
+                }
             }
         });
     }

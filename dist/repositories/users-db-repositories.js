@@ -10,9 +10,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersRepositories = void 0;
+const db_1 = require("./db");
 exports.UsersRepositories = {
-    getUsers(req, res, next) {
+    getUser({ email, id }) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (email) {
+                return yield db_1.usersCollection.findOne({ email });
+            }
+            if (id) {
+                return yield db_1.usersCollection.findOne({ id });
+            }
+        });
+    },
+    getUsers() {
+        return __awaiter(this, void 0, void 0, function* () {
+            debugger;
+            const result = yield db_1.usersCollection.find().toArray();
+            return result;
         });
     }
 };

@@ -1,0 +1,56 @@
+import {Request, Response, Router} from "express";
+import { briefcaseService } from "../services/briefcase-service";
+
+export const briefcaseRoute= Router({})
+
+briefcaseRoute.get('/', async (req: Request, res: Response) => {
+    let briefcases = await briefcaseService.getBriefcase(req.user.id)
+    res.send(briefcases)
+})
+
+briefcaseRoute.get('/:id', async (req: Request, res: Response) => {
+    const briefcase = await briefcaseService.getBriefcaseById(req.params.id , req.user.id)
+    if (briefcase) {
+        res.send(briefcase)
+    } else {
+        res.status(404).send('not Found')
+    }
+})
+briefcaseRoute.post('/:id', async (req: Request, res: Response) => {
+
+    const idBriefcase = req.params.id
+    const body = req.body
+    if(idBriefcase){
+        const order = await briefcaseService.createOrder(idBriefcase, body)
+       res.send(order)
+    }
+    else  res.status(500).send('not remove')
+})
+
+briefcaseRoute.post('/', async (req: Request, res: Response) => {
+    let briefcaseUser = await briefcaseService.createBriefcase(req.body, req.user.id)
+    res.send(briefcaseUser)
+})
+
+briefcaseRoute.delete('/:id', async (req: Request, res: Response, next) => {
+    let id = req.params.id
+    if(id) {
+     await briefcaseService.removeBriefcase(id)
+    res.send({message: `${id} успешно удален`})
+ 
+    }
+    else{
+        next(`${id} не удален по непонятным причинам`)
+    }
+   
+})
+
+
+briefcaseRoute.get('/:id/purchases', async (req: Request, res: Response) => {
+    const idBriefcase = req.params.id
+    if(idBriefcase){
+        const purchases = await briefcaseService.getPurchases(idBriefcase)
+       res.send(purchases)
+    }
+    else  res.status(500).send('not remove')
+})

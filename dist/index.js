@@ -21,7 +21,13 @@ const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const auth_route_1 = require("./routes/auth-route");
 const users_route_1 = require("./routes/users-route");
-// import mongoose from 'mongoose'
+const error_middleware_1 = __importDefault(require("./middlewares/error-middleware"));
+const auth_middleware_1 = require("./middlewares/auth-middleware");
+const checkActivation_middleware_1 = require("./middlewares/checkActivation-middleware");
+const briefcase_route_1 = require("./routes/briefcase-route");
+const catalog_route_1 = require("./routes/catalog-route");
+const address_route_1 = require("./routes/address-route");
+const phone_route_1 = require("./routes/phone-route");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
@@ -36,17 +42,18 @@ const parserMiddleware = (0, body_parser_1.default)();
 app.use(parserMiddleware);
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)(corsOptions));
-app.use('/clients', clients_route_1.clientsRoute);
-app.use('/auth', auth_route_1.authRoute);
-app.use('/users', users_route_1.usersRoute);
-app.get('/', (req, res) => {
-    res.send('<h1 style={color: "red"}>HelloWord</h1>');
-});
+app.use('/clients', auth_middleware_1.authMiddleware, checkActivation_middleware_1.isActivationMiddleware, clients_route_1.clientsRoute);
+app.use('/', auth_route_1.authRoute);
+app.use('/users', auth_middleware_1.authMiddleware, users_route_1.usersRoute);
+app.use('/briefcase', auth_middleware_1.authMiddleware, checkActivation_middleware_1.isActivationMiddleware, briefcase_route_1.briefcaseRoute);
+app.use('/address', auth_middleware_1.authMiddleware, address_route_1.addressRoute);
+app.use('/catalog', auth_middleware_1.authMiddleware, catalog_route_1.catalogRoute);
+app.use('/phone', auth_middleware_1.authMiddleware, phone_route_1.phoneRoute);
+app.use(error_middleware_1.default);
 const startApp = () => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, db_1.runDb)();
-    // process.env.DB_URL &&  await mongoose.connect(process.env.DB_URL)
     app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`);
+        console.log(`App listening on port ${port}`);
     });
 });
 startApp();

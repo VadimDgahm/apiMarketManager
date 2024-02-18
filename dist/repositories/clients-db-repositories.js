@@ -8,32 +8,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientsRepositories = void 0;
 const db_1 = require("./db");
 exports.clientsRepositories = {
-    findClients(title) {
+    findClients(title, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const filter = {};
-            if (title) {
-                filter.name = { $regex: title };
+            const userClients = yield db_1.clientCollection.find({ userId: id }).toArray();
+            if (userClients) {
+                if (title) {
+                    return userClients.filter(el => el.name === title);
+                }
+                else {
+                    return userClients;
+                }
             }
-            const arr = yield db_1.clientCollection.find(filter).toArray();
-            return arr.map(el => {
-                const { _id } = el, arg = __rest(el, ["_id"]);
-                return arg;
-            });
+            else {
+                throw new Error('Клиенты не найдены');
+            }
         });
     },
     createClient(body) {
@@ -42,20 +34,20 @@ exports.clientsRepositories = {
             return body;
         });
     },
-    getClientById(id) {
+    getClientById(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const client = yield db_1.clientCollection.findOne({ id });
-            if (client) {
-                return client;
+            const userClient = yield db_1.clientCollection.findOne({ id, userId });
+            if (userClient) {
+                return userClient;
             }
             else {
                 return undefined;
             }
         });
     },
-    updateClient(id, newName) {
+    updateClient(id, filter) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield db_1.clientCollection.updateOne({ id }, { $set: { name: newName } });
+            const result = yield db_1.clientCollection.updateOne({ id }, { $set: filter });
             return result.matchedCount === 1;
         });
     },

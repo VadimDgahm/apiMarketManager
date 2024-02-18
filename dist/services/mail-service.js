@@ -8,35 +8,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.mailService = void 0;
-const nodemailer_1 = __importDefault(require("nodemailer"));
-const xxx = {
-    port: 465,
-    secure: true,
-    host: "smtp.gmail.com",
-    auth: {
-        user: "meatemarketsup@gmail.com",
-        password: "tdts ymbe zadj uggg"
+const nodemailer = require('nodemailer');
+class MailService {
+    constructor() {
+        this.transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: false,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASSWORD,
+            }
+        });
     }
-};
-exports.mailService = {
-    transporter() {
-        return nodemailer_1.default.createTransport(xxx);
-    },
     sendActivationMail(to, link) {
         return __awaiter(this, void 0, void 0, function* () {
-            const res = this.transporter();
-            yield res.sendMail({
-                from: 'Fred Foo 👻', // sender address
-                to, // list of receivers
-                subject: "Hello ✔", // Subject line
-                text: "Hello world?", // plain text body
-                html: "<b>Hello world?</b>", // html body
+            debugger;
+            yield this.transporter.sendMail({
+                from: process.env.SMTP_USER,
+                to,
+                subject: 'Активация аккаунта на' + process.env.API_URL,
+                text: '',
+                html: `
+                   <div>
+                        <h1>Для активации перейдите по ссылке</h1>
+                        <a href="${link}">${link}</a>
+                    </div>
+                `
             });
         });
     }
-};
+}
+module.exports = new MailService();

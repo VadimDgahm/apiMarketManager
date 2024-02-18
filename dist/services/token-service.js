@@ -17,7 +17,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("../repositories/db");
 exports.tokenService = {
     generationTokens(payload) {
-        const accessToken = jsonwebtoken_1.default.sign(payload, process.env.JWT_ACCESS_SECRET || 'new-token-secret', { expiresIn: '30m' });
+        const accessToken = jsonwebtoken_1.default.sign(payload, process.env.JWT_ACCESS_SECRET || 'new-token-secret', { expiresIn: '30s' });
         const refreshToken = jsonwebtoken_1.default.sign(payload, process.env.JWT_REFRESH_SECRET || 'new-refresh-token-secret', { expiresIn: '30d' });
         return {
             accessToken,
@@ -26,12 +26,42 @@ exports.tokenService = {
     },
     saveToken(userId, refreshToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            const tokenData = yield db_1.RefreshTokenCollection.findOne({ user: userId });
+            const tokenData = yield db_1.refreshTokenCollection.findOne({ user: userId });
             if (tokenData) {
-                yield db_1.RefreshTokenCollection.updateOne({ user: userId }, { $set: { refreshToken: refreshToken } });
+                yield db_1.refreshTokenCollection.updateOne({ user: userId }, { $set: { refreshToken: refreshToken } });
             }
-            const token = yield db_1.RefreshTokenCollection.insertOne({ user: userId, refreshToken });
+            const token = yield db_1.refreshTokenCollection.insertOne({ user: userId, refreshToken });
             return token;
         });
-    }
+    },
+    removeToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokenData = yield db_1.refreshTokenCollection.deleteOne({ refreshToken });
+            return tokenData;
+        });
+    },
+    findToken(refreshToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tokenData = yield db_1.refreshTokenCollection.findOne({ refreshToken });
+            return tokenData;
+        });
+    },
+    validateAccessToken(token) {
+        try {
+            const userData = jsonwebtoken_1.default.verify(token, process.env.JWT_ACCESS_SECRET || 'new-token-secret');
+            return userData;
+        }
+        catch (e) {
+            return null;
+        }
+    },
+    validateRefreshToken(token) {
+        try {
+            const userData = jsonwebtoken_1.default.verify(token, process.env.JWT_REFRESH_SECRET || 'new-refresh-token-secret');
+            return userData;
+        }
+        catch (e) {
+            return null;
+        }
+    },
 };

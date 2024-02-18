@@ -1,0 +1,40 @@
+import {clientsRepositories} from '../repositories/clients-db-repositories';
+import {QueryResponse} from '../routes/clients-route';
+import {v4 as uuidv4} from 'uuid';
+
+import { catalogRepositories } from '../repositories/catalog-db-repositories';
+
+export const catalogService = {
+    async getCatalog() {
+        return await catalogRepositories.getCatalog()
+    },
+    async createProduct({name, price, type, userId, view,reductionName}:ProductTypeRequest) {
+        const body: ProductType = {
+            id: uuidv4(),
+            name,
+            price,
+            type,
+            view,
+            userId,
+            reductionName
+        }
+        return await catalogRepositories.createProduct(body)
+    },
+    async removeProduct(id: string, userId: string){
+        return await catalogRepositories.removeProduct(id, userId)
+    }
+}
+
+
+export type ProductTypeRequest = {
+    name: string
+    price: string
+    type: "Сырьевой" | "Готовый"
+    userId:string
+    view: "Свинина" | "Птица" | "Говядина"
+    reductionName: string
+}
+
+export type ProductType = {
+    id: string,
+} & ProductTypeRequest

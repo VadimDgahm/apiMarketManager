@@ -4,10 +4,12 @@ import {v4 as uuidv4} from 'uuid';
 import { getCurrentDate } from '../utils/utils';
 
 export const clientsService = {
-    async findClients(title: QueryResponse): Promise<ClientType[]> {
-        return await clientsRepositories.findClients(title)
+    async findClients(title: QueryResponse, id: string): Promise<ClientType[]> {
+        return await clientsRepositories.findClients(title, id)
     },
-    async createClient({name, status = 'new', source, phones, addresses,comments}: CreateClientProps): Promise<ClientType> {
+
+    async createClient({name, status = 'новый', source = 'неопределен', phones, addresses,comments}: CreateClientProps, userId: string): Promise<ClientType> {
+       
         const currentDate = getCurrentDate()
         const body: ClientType = {
             id: uuidv4(),
@@ -18,18 +20,19 @@ export const clientsService = {
             addresses,
             comments,
             dateLastOrder: '',
-            createdDate: currentDate
+            createdDate: currentDate,
+            userId
         }
         const result = await clientsRepositories.createClient(body)
         return body
     },
-    async getClientById(id: string): Promise<ClientType | undefined> {
-        const client = clientsRepositories.getClientById(id)
+    async getClientById(id: string, userId: string): Promise<ClientType | undefined> {
+        const client = clientsRepositories.getClientById(id, userId)
     
         return client
     },
-    async updateClient(id: string, newName: string): Promise<boolean> {
-        return await clientsRepositories.updateClient(id, newName)
+    async updateClient(id: string, filter: ClientTypeFilter): Promise<boolean> {
+        return await clientsRepositories.updateClient(id, filter)
 
 
     },
@@ -38,22 +41,24 @@ export const clientsService = {
     }
 }
 
-type StatusClient = 'loyal' | 'new' | 'uncertain'
-type PhoneClient = {
+type StatusClient = 'постоянный' | 'новый' | 'непостоянный'
+export type PhoneClient = {
     tel: string,
-    nameUserPhone: string
+    nameUserPhone: string,
+    idPhone: string;
 }
-type AddressClient = {
-    city: string,
-    street: string,
-    numberStreet: string,
-    buildingSection?: string, // корпус
-    numberApartment?: string,
-    lobby?: string, //  подъзд
-    floor?: string, //  этаж
-    code?: string,
-    statusAddress?: 'apartment' | 'house' | 'job'
-}
+
+ type AddressClient = {
+    idAddress: string;
+    buildingSection?: null | string; // корпус
+    city: null | string;
+    code?: null | string;
+    floor?: null | string; //  этаж
+    lobby?: null | string; //  подъзд
+    numberApartment?: null | string;
+    numberStreet: null | string;
+    street: null | string;
+  };
 export type ClientType = {
     id: string,
     name: string,
@@ -64,5 +69,9 @@ export type ClientType = {
     dateLastOrder: string
     comments: string[]
     createdDate: string
+    userId: string
 }
 type CreateClientProps = Omit<ClientType, 'id'>
+
+
+export type ClientTypeFilter = Partial<Pick<ClientType, 'name' | 'status' | "source"| "comments">>;

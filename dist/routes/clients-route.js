@@ -16,25 +16,25 @@ exports.clientsRoute = (0, express_1.Router)({});
 exports.clientsRoute.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     let query = req.query;
-    let clients = yield clients_service_1.clientsService.findClients((_a = query.name) === null || _a === void 0 ? void 0 : _a.toString());
+    let clients = yield clients_service_1.clientsService.findClients((_a = query.name) === null || _a === void 0 ? void 0 : _a.toString(), req.user.id);
     res.send(clients);
 }));
 exports.clientsRoute.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const newClient = yield clients_service_1.clientsService.createClient(req.body);
+    const newClient = yield clients_service_1.clientsService.createClient(req.body, req.user.id);
     res.send(newClient);
 }));
 exports.clientsRoute.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const client = yield clients_service_1.clientsService.getClientById(req.params.id);
+    const client = yield clients_service_1.clientsService.getClientById(req.params.id, req.user.id);
     if (client) {
         res.send(client);
     }
     else {
-        res.status(404).send('not Find');
+        res.status(404).send('not Found');
     }
 }));
 exports.clientsRoute.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name } = req.body;
-    const answer = yield clients_service_1.clientsService.updateClient(req.params.id, name);
+    const filter = req.body;
+    const answer = yield clients_service_1.clientsService.updateClient(req.params.id, filter);
     if (answer) {
         res.status(200).send("clients updated");
     }

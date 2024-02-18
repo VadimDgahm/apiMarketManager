@@ -14,12 +14,12 @@ const clients_db_repositories_1 = require("../repositories/clients-db-repositori
 const uuid_1 = require("uuid");
 const utils_1 = require("../utils/utils");
 exports.clientsService = {
-    findClients(title) {
+    findClients(title, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield clients_db_repositories_1.clientsRepositories.findClients(title);
+            return yield clients_db_repositories_1.clientsRepositories.findClients(title, id);
         });
     },
-    createClient({ name, status = 'new', source, phones, addresses, comments }) {
+    createClient({ name, status = 'новый', source = 'неопределен', phones, addresses, comments }, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const currentDate = (0, utils_1.getCurrentDate)();
             const body = {
@@ -31,21 +31,22 @@ exports.clientsService = {
                 addresses,
                 comments,
                 dateLastOrder: '',
-                createdDate: currentDate
+                createdDate: currentDate,
+                userId
             };
             const result = yield clients_db_repositories_1.clientsRepositories.createClient(body);
             return body;
         });
     },
-    getClientById(id) {
+    getClientById(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const client = clients_db_repositories_1.clientsRepositories.getClientById(id);
+            const client = clients_db_repositories_1.clientsRepositories.getClientById(id, userId);
             return client;
         });
     },
-    updateClient(id, newName) {
+    updateClient(id, filter) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield clients_db_repositories_1.clientsRepositories.updateClient(id, newName);
+            return yield clients_db_repositories_1.clientsRepositories.updateClient(id, filter);
         });
     },
     removeClient(id) {

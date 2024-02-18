@@ -7,7 +7,14 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser'
 import {authRoute} from './routes/auth-route';
 import {usersRoute} from './routes/users-route';
-// import mongoose from 'mongoose'
+import errorMiddleware from './middlewares/error-middleware';
+import {authMiddleware} from './middlewares/auth-middleware';
+import { isActivationMiddleware } from "./middlewares/checkActivation-middleware";
+import { briefcaseRoute } from "./routes/briefcase-route";
+import { catalogRoute } from "./routes/catalog-route";
+import { addressRoute } from "./routes/address-route";
+import { phoneRoute } from "./routes/phone-route";
+
 
 dotenv.config()
 const app = express()
@@ -23,27 +30,25 @@ const corsOptions = {
 const parserMiddleware = bodyParser()
 
 
+
 app.use(parserMiddleware)
 app.use(cookieParser())
 app.use(cors(corsOptions));
-app.use('/clients', clientsRoute)
-app.use('/auth', authRoute)
-app.use('/users', usersRoute)
+app.use('/clients',authMiddleware,isActivationMiddleware, clientsRoute)
+app.use('/', authRoute)
+app.use('/users', authMiddleware, usersRoute)
+app.use('/briefcase',authMiddleware,isActivationMiddleware, briefcaseRoute)
+app.use('/address',authMiddleware, addressRoute)
+app.use('/catalog',authMiddleware, catalogRoute)
+app.use('/phone',authMiddleware, phoneRoute)
+app.use(errorMiddleware)
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('<h1 style={color: "red"}>HelloWord</h1>')
-})
 
 const startApp = async () => {
 
         await runDb()
-
-    // process.env.DB_URL &&  await mongoose.connect(process.env.DB_URL)
-
         app.listen(port, () => {
-            console.log(`Example app listening on port ${port}`)
+            console.log(`App listening on port ${port}`)
         })
-
-
 }
 startApp()

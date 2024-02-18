@@ -1,14 +1,16 @@
 import {NextFunction, Request, Response, Router} from 'express';
+import {UsersRepositories} from '../repositories/users-db-repositories';
 
 
 
 export const usersRoute = Router({})
 
 usersRoute.get('/',
-    (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
     try {
-        res.json('All ok')
+        const users =  await UsersRepositories.getUsers()
+        res.send(users)
     } catch (e) {
-        console.log(e)
+        next(e)
     }
 },);
