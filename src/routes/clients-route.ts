@@ -1,19 +1,20 @@
 import {Request, Response, Router} from 'express';
 import {clientsService} from '../services/clients-service';
+import { AuthenticatedRequest } from '../middlewares/checkActivation-middleware';
 
 
 export const clientsRoute = Router({})
 
-clientsRoute.get('/', async (req: Request, res: Response) => {
+clientsRoute.get('/', async (req: AuthenticatedRequest, res: Response) => {
     let query = req.query
     let clients = await clientsService.findClients(query.name?.toString(), req.user.id)
     res.send(clients)
 })
-clientsRoute.post('/', async (req: Request, res: Response) => {
+clientsRoute.post('/', async (req: AuthenticatedRequest, res: Response) => {
     const newClient = await clientsService.createClient(req.body, req.user.id)
     res.send(newClient)
 })
-clientsRoute.get('/:id', async (req: Request, res: Response) => {
+clientsRoute.get('/:id', async (req: AuthenticatedRequest , res: Response) => {
     const client = await clientsService.getClientById(req.params.id , req.user.id)
     if (client) {
         res.send(client)
