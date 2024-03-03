@@ -78,3 +78,9 @@ authRoute.get('/refresh',
             next(e)
         }
     },)
+
+
+authRoute.get('/',
+    async (req: Request, res: Response, next: NextFunction) => {
+                res.send('Hello world')
+    },)
