@@ -1,13 +1,10 @@
 import {NextFunction, Request, Response} from 'express';
 import ApiErrors from '../exceptions/api-error';
 import {tokenService} from '../services/token-service';
-import {UserType} from '../services/auth-service';
-import {JwtPayload} from 'jsonwebtoken';
-interface AuthenticatedRequest extends Request {
-    user: JwtPayload;
-}
+import { AuthenticatedRequest } from './checkActivation-middleware';
+
 export function authMiddleware(
-    req: Request,
+    req: AuthenticatedRequest,
     res: Response,
     next: NextFunction
 ) {
@@ -20,7 +17,8 @@ export function authMiddleware(
       if(!userData){
           return next(ApiErrors.UnauthorizedError())
       }
-      req.user = userData
+
+      req.user = {id: userData.id, email: userData.email, isActivated: userData.isActivated}
       next()
   } catch (e){
       return next(ApiErrors.UnauthorizedError())

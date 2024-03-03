@@ -1,14 +1,17 @@
 import {Request, Response, Router} from "express";
 import { briefcaseService } from "../services/briefcase-service";
+import {AuthenticatedRequest} from '../middlewares/checkActivation-middleware';
 
 export const briefcaseRoute= Router({})
 
-briefcaseRoute.get('/', async (req: Request, res: Response) => {
+// @ts-ignore
+briefcaseRoute.get('/', async (req: AuthenticatedRequest, res: Response) => {
     let briefcases = await briefcaseService.getBriefcase(req.user.id)
     res.send(briefcases)
 })
 
-briefcaseRoute.get('/:id', async (req: Request, res: Response) => {
+// @ts-ignore
+briefcaseRoute.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
     const briefcase = await briefcaseService.getBriefcaseById(req.params.id , req.user.id)
     if (briefcase) {
         res.send(briefcase)
@@ -27,7 +30,8 @@ briefcaseRoute.post('/:id', async (req: Request, res: Response) => {
     else  res.status(500).send('not remove')
 })
 
-briefcaseRoute.post('/', async (req: Request, res: Response) => {
+// @ts-ignore
+briefcaseRoute.post('/', async (req: AuthenticatedRequest, res: Response) => {
     let briefcaseUser = await briefcaseService.createBriefcase(req.body, req.user.id)
     res.send(briefcaseUser)
 })

@@ -17,7 +17,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("../repositories/db");
 exports.tokenService = {
     generationTokens(payload) {
-        const accessToken = jsonwebtoken_1.default.sign(payload, process.env.JWT_ACCESS_SECRET || 'new-token-secret', { expiresIn: '30s' });
+        const accessToken = jsonwebtoken_1.default.sign(payload, process.env.JWT_ACCESS_SECRET || 'new-token-secret', { expiresIn: '3h' });
         const refreshToken = jsonwebtoken_1.default.sign(payload, process.env.JWT_REFRESH_SECRET || 'new-refresh-token-secret', { expiresIn: '30d' });
         return {
             accessToken,

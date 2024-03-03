@@ -1,10 +1,15 @@
 import {NextFunction, Request, Response} from 'express';
 import ApiErrors from '../exceptions/api-error';
 
-import {JwtPayload} from 'jsonwebtoken';
-export interface AuthenticatedRequest extends Request {
-    user: JwtPayload;
+export type DataTypeRequest = {
+    id: string
+    email: string
+    isActivated: boolean
 }
+
+export type AuthenticatedRequest = {
+    user: DataTypeRequest;
+} & Request
 export function isActivationMiddleware(
     req: AuthenticatedRequest,
     res: Response,

@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const clients_route_1 = require("./routes/clients-route");
+const clients_route_1 = __importDefault(require("./routes/clients-route"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const db_1 = require("./repositories/db");
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -42,12 +42,18 @@ const parserMiddleware = (0, body_parser_1.default)();
 app.use(parserMiddleware);
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)(corsOptions));
-app.use('/clients', auth_middleware_1.authMiddleware, checkActivation_middleware_1.isActivationMiddleware, clients_route_1.clientsRoute);
+// @ts-ignore
+app.use('/clients', auth_middleware_1.authMiddleware, checkActivation_middleware_1.isActivationMiddleware, clients_route_1.default);
 app.use('/', auth_route_1.authRoute);
+// @ts-ignore
 app.use('/users', auth_middleware_1.authMiddleware, users_route_1.usersRoute);
+// @ts-ignore
 app.use('/briefcase', auth_middleware_1.authMiddleware, checkActivation_middleware_1.isActivationMiddleware, briefcase_route_1.briefcaseRoute);
+// @ts-ignore
 app.use('/address', auth_middleware_1.authMiddleware, address_route_1.addressRoute);
-app.use('/catalog', auth_middleware_1.authMiddleware, catalog_route_1.catalogRoute);
+// @ts-ignore
+app.use('/catalog', auth_middleware_1.authMiddleware, checkActivation_middleware_1.isActivationMiddleware, catalog_route_1.catalogRoute);
+// @ts-ignore
 app.use('/phone', auth_middleware_1.authMiddleware, phone_route_1.phoneRoute);
 app.use(error_middleware_1.default);
 const startApp = () => __awaiter(void 0, void 0, void 0, function* () {

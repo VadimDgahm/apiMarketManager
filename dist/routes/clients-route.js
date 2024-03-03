@@ -8,31 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clientsRoute = void 0;
-const express_1 = require("express");
+const express_1 = __importDefault(require("express"));
 const clients_service_1 = require("../services/clients-service");
-exports.clientsRoute = (0, express_1.Router)({});
-exports.clientsRoute.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const clientsRoute = express_1.default.Router();
+// @ts-ignore
+clientsRoute.get('/', (req, res) => {
     var _a;
     let query = req.query;
-    let clients = yield clients_service_1.clientsService.findClients((_a = query.name) === null || _a === void 0 ? void 0 : _a.toString(), req.user.id);
-    res.send(clients);
-}));
-exports.clientsRoute.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const newClient = yield clients_service_1.clientsService.createClient(req.body, req.user.id);
-    res.send(newClient);
-}));
-exports.clientsRoute.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const client = yield clients_service_1.clientsService.getClientById(req.params.id, req.user.id);
-    if (client) {
+    clients_service_1.clientsService.findClients((_a = query.name) === null || _a === void 0 ? void 0 : _a.toString(), req.user.id).then(clients => res.send(clients));
+});
+// @ts-ignore
+clientsRoute.post('/', (req, res) => {
+    clients_service_1.clientsService.createClient(req.body, req.user.id).then(newClient => res.send(newClient));
+});
+// @ts-ignore
+clientsRoute.get('/:id', (req, res) => {
+    let clientRes = {};
+    clients_service_1.clientsService.getClientById(req.params.id, req.user.id).then(client => {
         res.send(client);
-    }
-    else {
-        res.status(404).send('not Found');
-    }
-}));
-exports.clientsRoute.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    }).catch(e => res.status(404).send({ message: ['not Found', e.messages] }));
+});
+clientsRoute.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const filter = req.body;
     const answer = yield clients_service_1.clientsService.updateClient(req.params.id, filter);
     if (answer) {
@@ -42,8 +42,9 @@ exports.clientsRoute.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0,
         res.status(400).send('client not updated');
     }
 }));
-exports.clientsRoute.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+clientsRoute.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const answer = yield clients_service_1.clientsService.removeClient(req.params.id.toString());
     answer && res.status(200).send('success');
     !answer && res.status(404).send('not found client');
 }));
+exports.default = clientsRoute;

@@ -1,5 +1,5 @@
-import express,{Response,Request} from "express"
-import {clientsRoute} from './routes/clients-route';
+import express from "express"
+import clientsRoute from './routes/clients-route';
 import bodyParser  from 'body-parser'
 import {runDb} from './repositories/db';
 import dotenv  from 'dotenv'
@@ -18,7 +18,7 @@ import { phoneRoute } from "./routes/phone-route";
 
 dotenv.config()
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 5000
 
 const corsOptions = {
     origin: 'http://localhost:5173',
@@ -34,12 +34,18 @@ const parserMiddleware = bodyParser()
 app.use(parserMiddleware)
 app.use(cookieParser())
 app.use(cors(corsOptions));
-app.use('/clients',authMiddleware,isActivationMiddleware, clientsRoute)
+// @ts-ignore
+app.use('/clients', clientsRoute)
 app.use('/', authRoute)
+// @ts-ignore
 app.use('/users', authMiddleware, usersRoute)
+// @ts-ignore
 app.use('/briefcase',authMiddleware,isActivationMiddleware, briefcaseRoute)
+// @ts-ignore
 app.use('/address',authMiddleware, addressRoute)
-app.use('/catalog',authMiddleware, catalogRoute)
+// @ts-ignore
+app.use('/catalog',authMiddleware,isActivationMiddleware, catalogRoute)
+// @ts-ignore
 app.use('/phone',authMiddleware, phoneRoute)
 app.use(errorMiddleware)
 

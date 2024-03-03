@@ -1,14 +1,14 @@
 import {NextFunction, Request, Response, Router} from 'express';
 import { catalogService } from '../services/catalog-service';
 import { authMiddleware } from '../middlewares/auth-middleware';
-import { isActivationMiddleware } from '../middlewares/checkActivation-middleware';
+import {AuthenticatedRequest, isActivationMiddleware} from '../middlewares/checkActivation-middleware';
 
 
 
 export const catalogRoute = Router({})
 
-catalogRoute.get('/',
-    async (req: Request, res: Response, next: NextFunction) => {
+// @ts-ignore
+catalogRoute.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const users =  await catalogService.getCatalog()
         res.send(users)
@@ -16,9 +16,8 @@ catalogRoute.get('/',
         next(e)
     }
 },);
-
-catalogRoute.post('/',isActivationMiddleware,
-    async (req: Request, res: Response, next: NextFunction) => {
+// @ts-ignore
+catalogRoute.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const body = req.body
         const users =  await catalogService.createProduct({userId: req.user.id,...body })
@@ -28,9 +27,8 @@ catalogRoute.post('/',isActivationMiddleware,
     }
 },);
 
-
-catalogRoute.delete('/:id',isActivationMiddleware,
-    async (req: Request, res: Response, next: NextFunction) => {
+// @ts-ignore
+catalogRoute.delete('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
         const id = req.params.id
     

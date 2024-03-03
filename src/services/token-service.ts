@@ -3,7 +3,7 @@ import {refreshTokenCollection} from '../repositories/db';
 
 export const tokenService = {
     generationTokens(payload: any) {
-        const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET || 'new-token-secret', {expiresIn: '30s'})
+        const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET || 'new-token-secret', {expiresIn: '3h'})
         const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET || 'new-refresh-token-secret', {expiresIn: '30d'})
         return {
             accessToken,
@@ -28,7 +28,6 @@ export const tokenService = {
     },
     validateAccessToken(token: string) {
         try {
-
             const userData = jwt.verify(token, process.env.JWT_ACCESS_SECRET || 'new-token-secret') as JwtPayload
             return userData
         } catch (e) {
