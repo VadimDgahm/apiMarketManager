@@ -47,4 +47,16 @@ exports.briefcaseRepositories = {
             }
         });
     },
+    removeOrder(idBriefcase, orderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const res = yield db_1.briefcaseCollection.findOne({ id: idBriefcase });
+            if (res) {
+                const order = res.orders.find((o) => o.orderId === orderId);
+                yield db_1.briefcaseCollection.updateOne({ id: idBriefcase }, { $pull: { orders: { orderId } } });
+                if (order) {
+                    return order;
+                }
+            }
+        });
+    },
 };

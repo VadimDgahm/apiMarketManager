@@ -58,3 +58,14 @@ briefcaseRoute.get('/:id/purchases', async (req: Request, res: Response) => {
     }
     else  res.status(500).send('not remove')
 })
+
+
+briefcaseRoute.delete('/:id/orders/:orderId', async (req: Request, res: Response) => {
+    const idBriefcase = req.params.id
+    const orderId = req.params.orderId
+    if(idBriefcase && orderId){
+        const order = await briefcaseService.removeOrder(idBriefcase, orderId)
+       res.send(order)
+    }
+    else  res.status(500).send('not remove')
+})

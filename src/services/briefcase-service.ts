@@ -39,6 +39,9 @@ export const briefcaseService = {
     async getPurchases (id: string) {
         await briefcaseRepositories.getPurchases(id)
    },
+   async removeOrder (idBriefcase: string, orderId: string) {
+    return await briefcaseRepositories.removeOrder(idBriefcase, orderId)
+},
 }
 
 

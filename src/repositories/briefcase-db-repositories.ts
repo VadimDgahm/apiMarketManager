@@ -30,6 +30,21 @@ export const briefcaseRepositories = {
         if(res){
             
         }
-   },
+    },
+    async removeOrder(idBriefcase: string, orderId: string): Promise<any>{
+        const res = await briefcaseCollection.findOne({id: idBriefcase})
+        
+        if(res){
+            const order = res.orders.find((o) => o.orderId === orderId);
+             await briefcaseCollection.updateOne(
+                { id: idBriefcase },
+                { $pull: { orders: { orderId } } }
+              );
+              if(order) {
+                return order
+            }
+        }
+    },
+    
      
 }

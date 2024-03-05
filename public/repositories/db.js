@@ -11,8 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runDb = exports.catalogCollection = exports.briefcaseCollection = exports.refreshTokenCollection = exports.usersCollection = exports.clientCollection = void 0;
 const mongodb_1 = require("mongodb");
-const mongoUri = process.env.mongoURI || 'mongodb://0.0.0.0:27017';
-const client = new mongodb_1.MongoClient(mongoUri);
+const mongoUri = "mongodb://atlas-sql-65e47108cf579b502236c4fd-l2xx0.a.query.mongodb.net/meatMarket?ssl=true&authSource=admin";
+const client = new mongodb_1.MongoClient(mongoUri, {
+    serverApi: {
+        version: mongodb_1.ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
 const db = client.db('meatMarket');
 exports.clientCollection = db.collection('clients');
 exports.usersCollection = db.collection('users');
@@ -26,8 +32,8 @@ function runDb() {
             yield client.db("meatMarket").command({ ping: 1 });
             console.log("Connected successfully to mongo server");
         }
-        catch (_a) {
-            console.log("can`t to db");
+        catch (e) {
+            console.log("can't to db");
             yield client.close();
         }
     });

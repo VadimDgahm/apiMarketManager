@@ -58,4 +58,9 @@ exports.briefcaseService = {
             yield briefcase_db_repositories_1.briefcaseRepositories.getPurchases(id);
         });
     },
+    removeOrder(idBriefcase, orderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield briefcase_db_repositories_1.briefcaseRepositories.removeOrder(idBriefcase, orderId);
+        });
+    },
 };

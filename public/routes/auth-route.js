@@ -78,9 +78,11 @@ exports.authRoute.get('/refresh', (req, res, next) => __awaiter(void 0, void 0, 
 exports.authRoute.get('/me', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { refreshToken } = req.cookies;
-        if (!refreshToken) {
-            res.send();
+        if (refreshToken) {
+            res.status(200).send({ message: "Пользователь авторизован" });
         }
+        else
+            res.status(401).send({ message: "Пользователь не авторизован" });
     }
     catch (e) {
         next(e);

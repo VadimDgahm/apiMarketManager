@@ -62,3 +62,13 @@ exports.briefcaseRoute.get('/:id/purchases', (req, res) => __awaiter(void 0, voi
     else
         res.status(500).send('not remove');
 }));
+exports.briefcaseRoute.delete('/:id/orders/:orderId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const idBriefcase = req.params.id;
+    const orderId = req.params.orderId;
+    if (idBriefcase && orderId) {
+        const order = yield briefcase_service_1.briefcaseService.removeOrder(idBriefcase, orderId);
+        res.send(order);
+    }
+    else
+        res.status(500).send('not remove');
+}));
