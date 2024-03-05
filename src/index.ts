@@ -18,7 +18,7 @@ import { phoneRoute } from "./routes/phone-route";
 
 dotenv.config()
 const app = express()
-const port = process.env.PORT || 5000
+const port = process.env.PORT
 
 const corsOptions = {
     origin: 'http://localhost:5173',
