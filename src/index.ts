@@ -14,6 +14,7 @@ import { briefcaseRoute } from "./routes/briefcase-route";
 import { catalogRoute } from "./routes/catalog-route";
 import { addressRoute } from "./routes/address-route";
 import { phoneRoute } from "./routes/phone-route";
+import path from "path";
 
 
 dotenv.config()
@@ -28,6 +29,10 @@ const corsOptions = {
     maxAge: 600,
   };
 const parserMiddleware = bodyParser()
+
+const publicPath = path.join(__dirname, 'public');
+
+app.use(express.static(publicPath));
 
 
 

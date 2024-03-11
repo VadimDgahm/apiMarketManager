@@ -6,7 +6,7 @@ import { BriefcaseType } from "../services/briefcase-service";
 import { ProductType } from "../services/catalog-service";
 
 
-const mongoUri = "mongodb://atlas-sql-65e47108cf579b502236c4fd-l2xx0.a.query.mongodb.net/meatMarket?ssl=true&authSource=admin"
+const mongoUri = "mongodb://0.0.0.0:27017"
 const client = new MongoClient(mongoUri, {
     serverApi: {
         version: ServerApiVersion.v1,
