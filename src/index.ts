@@ -37,7 +37,7 @@ app.use(parserMiddleware)
 app.use(cookieParser())
 app.use(cors(corsOptions));
 // @ts-ignore
-app.use('/clients', clientsRoute)
+app.use('/clients',authMiddleware, clientsRoute)
 
 app.use('/', authRoute)
 // @ts-ignore
