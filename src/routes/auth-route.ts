@@ -2,6 +2,7 @@ import {NextFunction, Request, Response, Router} from 'express';
 import {authService} from '../services/auth-service';
 import {body, validationResult} from 'express-validator'
 import ApiErrors from '../exceptions/api-error';
+import { authMiddleware } from '../middlewares/auth-middleware';
 
 
 export const authRoute = Router({})
@@ -24,6 +25,7 @@ authRoute.post('/registration',
     },);
 authRoute.post('/login',
     async (req: Request, res: Response, next: NextFunction) => {
+        debugger
         try {
             const {email, password} = req.body
             const userData = await authService.login(email,password)
@@ -69,7 +71,7 @@ authRoute.get('/refresh',
 
     authRoute.get('/me',
     async (req: Request, res: Response, next: NextFunction) => {
-     
+
         try {
             const {refreshToken} = req.cookies;
            if(refreshToken){
@@ -82,7 +84,7 @@ authRoute.get('/refresh',
     },)
 
 
-authRoute.get('/',
+authRoute.get('/',authMiddleware,
     async (req: Request, res: Response, next: NextFunction) => {
                 res.send('Hello world')
     },)

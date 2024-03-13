@@ -17,6 +17,7 @@ const express_1 = require("express");
 const auth_service_1 = require("../services/auth-service");
 const express_validator_1 = require("express-validator");
 const api_error_1 = __importDefault(require("../exceptions/api-error"));
+const auth_middleware_1 = require("../middlewares/auth-middleware");
 exports.authRoute = (0, express_1.Router)({});
 exports.authRoute.post('/registration', (0, express_validator_1.body)('password').isLength({ min: 3, max: 32 }).isString(), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -33,6 +34,7 @@ exports.authRoute.post('/registration', (0, express_validator_1.body)('password'
     }
 }));
 exports.authRoute.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    debugger;
     try {
         const { email, password } = req.body;
         const userData = yield auth_service_1.authService.login(email, password);
@@ -88,7 +90,7 @@ exports.authRoute.get('/me', (req, res, next) => __awaiter(void 0, void 0, void 
         next(e);
     }
 }));
-exports.authRoute.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.authRoute.get('/', auth_middleware_1.authMiddleware, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     res.send('Hello world');
 }));
 //# sourceMappingURL=auth-route.js.map

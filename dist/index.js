@@ -43,7 +43,7 @@ app.use(parserMiddleware);
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)(corsOptions));
 // @ts-ignore
-app.use('/clients', auth_middleware_1.authMiddleware, clients_route_1.default);
+app.use('/clients', auth_middleware_1.authMiddleware, checkActivation_middleware_1.isActivationMiddleware, clients_route_1.default);
 app.use('/', auth_route_1.authRoute);
 // @ts-ignore
 app.use('/users', auth_middleware_1.authMiddleware, users_route_1.usersRoute);
