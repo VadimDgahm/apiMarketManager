@@ -34,12 +34,11 @@ exports.authRoute.post('/registration', (0, express_validator_1.body)('password'
     }
 }));
 exports.authRoute.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    debugger;
     try {
         const { email, password } = req.body;
         const userData = yield auth_service_1.authService.login(email, password);
-        res.cookie('accessToken', userData === null || userData === void 0 ? void 0 : userData.accessToken, { maxAge: 30 * 60 * 1000, httpOnly: true });
-        res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+        res.cookie('accessToken', userData === null || userData === void 0 ? void 0 : userData.accessToken, { maxAge: 30 * 60 * 1000, httpOnly: true, sameSite: 'none', secure: true });
+        res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'none', secure: true });
         return res.send(userData);
     }
     catch (e) {
