@@ -8,7 +8,6 @@ export const authService = {
     async registration(email: string, password: string) {
         const candidate = await UsersRepositories.getUser({email})
         if (candidate) {
-
             throw ApiErrors.BadRequest(`Пользователь с почтовым адресом ${email} уже существует`)
         }
         const hashPassword = await bcrypt.hash(password, 3)
@@ -18,7 +17,7 @@ export const authService = {
             activationLink,
             email,
             password: hashPassword,
-            isActivated: false
+            isActivated: true
         }
         await AuthDBRepositories.registration(body)
         const payload = {id: body.id, email, isActivated: body.isActivated}
@@ -26,7 +25,6 @@ export const authService = {
         await tokenService.saveToken(payload.id, tokens.refreshToken)
         // const res = await mailService.sendActivationMail(email, `${process.env.API_URL}/activate/${activationLink}`)
         return {...tokens, user: {...payload}}
-        return {}
     },
     async login(email: string, password: string) {
         const user = await UsersRepositories.getUser({email})
@@ -62,7 +60,7 @@ export const authService = {
             }
             if(user){
                 const payload = {id: user.id, email: user.email, isActivated: user.isActivated}
-                await tokenService.removeToken(refreshToken)
+                await tokenService.removeToken(payload.id)
                 const tokens = tokenService.generationTokens(payload)
                 await tokenService.saveToken(payload.id, tokens.refreshToken)
                 return {...tokens, user:{...payload}}

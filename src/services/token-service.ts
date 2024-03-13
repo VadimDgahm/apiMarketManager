@@ -18,8 +18,8 @@ export const tokenService = {
         const token = await refreshTokenCollection.insertOne({user: userId, refreshToken})
         return token
     },
-    async removeToken (refreshToken: string) {
-        const tokenData = await refreshTokenCollection.deleteOne({refreshToken})
+    async removeToken ( user: string) {
+        const tokenData = await refreshTokenCollection.deleteOne({user })
         return tokenData
     },
     async findToken (refreshToken: string) {

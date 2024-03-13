@@ -6,7 +6,7 @@ import { BriefcaseType } from "../services/briefcase-service";
 import { ProductType } from "../services/catalog-service";
 
 
-const mongoUri = "mongodb://0.0.0.0:27017"
+const mongoUri = "mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0"
 const client = new MongoClient(mongoUri, {
     serverApi: {
         version: ServerApiVersion.v1,

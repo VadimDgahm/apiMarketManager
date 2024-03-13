@@ -19,10 +19,10 @@ import path from "path";
 
 dotenv.config()
 const app = express()
-const port = process.env.PORT
+const port = process.env.PORT || 80
 
 const corsOptions = {
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173','https://market-managey.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
