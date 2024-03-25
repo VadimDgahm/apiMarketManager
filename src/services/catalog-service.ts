@@ -22,6 +22,9 @@ export const catalogService = {
     },
     async removeProduct(id: string, userId: string){
         return await catalogRepositories.removeProduct(id, userId)
+    },
+    async changeProduct(productId: string, userId: string, body: ProductTypeRequest){
+        return await catalogRepositories.changeProduct(productId, userId,body)
     }
 }
 

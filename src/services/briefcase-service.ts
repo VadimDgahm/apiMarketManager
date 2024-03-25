@@ -38,10 +38,13 @@ export const briefcaseService = {
     },
     async getPurchases (id: string) {
         await briefcaseRepositories.getPurchases(id)
-   },
-   async removeOrder (idBriefcase: string, orderId: string) {
+    },
+    async removeOrder (idBriefcase: string, orderId: string) {
     return await briefcaseRepositories.removeOrder(idBriefcase, orderId)
-},
+    },
+    async changeBriefcase (idBriefcase: string, body: BriefcaseType, userId: string) {
+    return await briefcaseRepositories.changeBriefcase(idBriefcase, body, userId)
+    },
 }
 
 

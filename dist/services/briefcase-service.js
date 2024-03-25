@@ -63,5 +63,10 @@ exports.briefcaseService = {
             return yield briefcase_db_repositories_1.briefcaseRepositories.removeOrder(idBriefcase, orderId);
         });
     },
+    changeBriefcase(idBriefcase, body, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield briefcase_db_repositories_1.briefcaseRepositories.changeBriefcase(idBriefcase, body, userId);
+        });
+    },
 };
 //# sourceMappingURL=briefcase-service.js.map

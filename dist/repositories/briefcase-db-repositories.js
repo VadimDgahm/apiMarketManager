@@ -59,5 +59,10 @@ exports.briefcaseRepositories = {
             }
         });
     },
+    changeBriefcase(idBriefcase, body, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield db_1.briefcaseCollection.findOneAndUpdate({ id: idBriefcase, userId }, { $set: { name: body.name } });
+        });
+    },
 };
 //# sourceMappingURL=briefcase-db-repositories.js.map

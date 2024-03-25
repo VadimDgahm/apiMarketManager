@@ -38,3 +38,14 @@ catalogRoute.delete('/:id', async (req: AuthenticatedRequest, res: Response, nex
         next(e)
     }
 },);
+
+catalogRoute.put('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+        const productId = req.params.id
+        const body = req.body
+        const users =  await catalogService.changeProduct(productId, req.user.id, body)
+        res.send(users)
+    } catch (e) {
+        next(e)
+    }
+},);

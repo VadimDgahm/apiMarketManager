@@ -36,6 +36,11 @@ exports.catalogService = {
         return __awaiter(this, void 0, void 0, function* () {
             return yield catalog_db_repositories_1.catalogRepositories.removeProduct(id, userId);
         });
+    },
+    changeProduct(productId, userId, body) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield catalog_db_repositories_1.catalogRepositories.changeProduct(productId, userId, body);
+        });
     }
 };
 //# sourceMappingURL=catalog-service.js.map

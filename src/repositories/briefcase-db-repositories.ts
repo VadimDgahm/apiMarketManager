@@ -45,6 +45,10 @@ export const briefcaseRepositories = {
             }
         }
     },
-    
+    async changeBriefcase(idBriefcase: string,  body: BriefcaseType, userId: string): Promise<any>{
+
+        return await briefcaseCollection.findOneAndUpdate({id: idBriefcase, userId}, { $set: {name: body.name} })
+      
+    },
      
 }

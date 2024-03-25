@@ -12,15 +12,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientsRepositories = void 0;
 const db_1 = require("./db");
 exports.clientsRepositories = {
-    findClients(title, id) {
+    findClients(title, id, page, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userClients = yield db_1.clientCollection.find({ userId: id }).toArray();
+            const userClients = (yield db_1.clientCollection.find({ userId: id }).toArray()).reverse();
+            const startIndex = (page - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const paginatedClients = userClients.slice(startIndex, endIndex);
             if (userClients) {
                 if (title) {
-                    return userClients.filter(el => el.name === title);
+                    const finishArr = userClients.filter(el => {
+                        const nameMatch = el.name.includes(title);
+                        const phoneMatch = el.phones.some(phone => phone.tel.includes(title));
+                        return nameMatch || phoneMatch;
+                    });
+                    const paginatedFinishArr = finishArr.slice(startIndex, endIndex);
+                    return { clients: paginatedFinishArr, totalCount: finishArr.length };
                 }
                 else {
-                    return userClients;
+                    return {
+                        clients: paginatedClients,
+                        totalCount: userClients.length
+                    };
                 }
             }
             else {

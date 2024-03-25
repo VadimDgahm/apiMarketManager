@@ -14,21 +14,21 @@ const clients_db_repositories_1 = require("../repositories/clients-db-repositori
 const uuid_1 = require("uuid");
 const utils_1 = require("../utils/utils");
 exports.clientsService = {
-    findClients(title, id) {
+    findClients(title, id, page, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield clients_db_repositories_1.clientsRepositories.findClients(title, id);
+            return yield clients_db_repositories_1.clientsRepositories.findClients(title, id, page, pageSize);
         });
     },
-    createClient({ name, status = 'новый', source = 'неопределен', phones, addresses, comments }, userId) {
+    createClient({ name, status = 'новый', source = 'неопределен', phones, comments }, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const currentDate = (0, utils_1.getCurrentDate)();
             const body = {
                 id: (0, uuid_1.v4)(),
                 name,
                 status,
-                source,
+                source: null,
                 phones,
-                addresses,
+                addresses: [],
                 comments,
                 dateLastOrder: '',
                 createdDate: currentDate,

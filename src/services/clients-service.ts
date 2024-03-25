@@ -4,20 +4,20 @@ import {v4 as uuidv4} from 'uuid';
 import { getCurrentDate } from '../utils/utils';
 
 export const clientsService = {
-    async findClients(title: QueryResponse, id: string): Promise<ClientType[]> {
-        return await clientsRepositories.findClients(title, id)
+    async findClients(title: QueryResponse, id: string, page: number, pageSize: number): Promise<{clients: ClientType[], totalCount: number}> {
+        return await clientsRepositories.findClients(title, id,page,pageSize)
     },
 
-    async createClient({name, status = 'новый', source = 'неопределен', phones, addresses,comments}: CreateClientProps, userId: string): Promise<ClientType> {
+    async createClient({name, status = 'новый', source = 'неопределен', phones,comments}: CreateClientProps, userId: string): Promise<ClientType> {
        
         const currentDate = getCurrentDate()
         const body: ClientType = {
             id: uuidv4(),
             name,
             status,
-            source,
+            source: null,
             phones,
-            addresses,
+            addresses: [],
             comments,
             dateLastOrder: '',
             createdDate: currentDate,

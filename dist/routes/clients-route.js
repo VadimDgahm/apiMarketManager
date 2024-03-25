@@ -19,7 +19,7 @@ const clientsRoute = express_1.default.Router();
 clientsRoute.get('/', (req, res) => {
     var _a;
     let query = req.query;
-    clients_service_1.clientsService.findClients((_a = query.name) === null || _a === void 0 ? void 0 : _a.toString(), req.user.id).then(clients => res.send(clients));
+    clients_service_1.clientsService.findClients((_a = query.search) === null || _a === void 0 ? void 0 : _a.toString(), req.user.id, +query.page, +query.pageSize).then(clients => res.send(clients));
 });
 // @ts-ignore
 clientsRoute.post('/', (req, res) => {

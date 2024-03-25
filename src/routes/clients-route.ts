@@ -7,8 +7,10 @@ const clientsRoute = express.Router()
 
 // @ts-ignore
 clientsRoute.get('/',  (req: AuthenticatedRequest, res: Response) => {
+
     let query = req.query
-    clientsService.findClients(query.name?.toString(), req.user.id).then(clients =>    res.send(clients) )
+
+    clientsService.findClients(query.search?.toString(), req.user.id, +query.page, +query.pageSize).then(clients =>    res.send(clients) )
 
 })
 // @ts-ignore

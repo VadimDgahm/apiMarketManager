@@ -5,8 +5,10 @@ import {UserRefreshToken} from '../services/token-service';
 import { BriefcaseType } from "../services/briefcase-service";
 import { ProductType } from "../services/catalog-service";
 
+const password = process.env.DB_PASSWORD
+const login = process.env.DB_LOGIN
+const mongoUri = `mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0` || "mongodb://0.0.0.0:27037"
 
-const mongoUri = "mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0"
 const client = new MongoClient(mongoUri, {
     serverApi: {
         version: ServerApiVersion.v1,

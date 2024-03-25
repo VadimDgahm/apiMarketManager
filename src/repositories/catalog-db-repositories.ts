@@ -1,7 +1,7 @@
 
 import {catalogCollection, usersCollection} from './db';
 import {UserType} from '../services/auth-service';
-import { ProductType } from '../services/catalog-service';
+import { ProductType, ProductTypeRequest } from '../services/catalog-service';
 
 
 export const catalogRepositories = {
@@ -13,5 +13,9 @@ export const catalogRepositories = {
     },
     async removeProduct(id: string, userId: string) {
       return await catalogCollection.deleteOne({id, userId})
+    },
+    async changeProduct(id: string, userId: string, body: ProductTypeRequest) {
+      return await catalogCollection.findOneAndUpdate({id, userId}, { $set: body })
+        
     }
 }

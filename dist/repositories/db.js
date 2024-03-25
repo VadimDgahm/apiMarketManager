@@ -11,7 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runDb = exports.catalogCollection = exports.briefcaseCollection = exports.refreshTokenCollection = exports.usersCollection = exports.clientCollection = void 0;
 const mongodb_1 = require("mongodb");
-const mongoUri = "mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0";
+const password = process.env.DB_PASSWORD;
+const login = process.env.DB_LOGIN;
+const mongoUri = `mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0` || "mongodb://0.0.0.0:27037";
 const client = new mongodb_1.MongoClient(mongoUri, {
     serverApi: {
         version: mongodb_1.ServerApiVersion.v1,

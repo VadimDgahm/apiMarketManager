@@ -45,4 +45,15 @@ exports.catalogRoute.delete('/:id', (req, res, next) => __awaiter(void 0, void 0
         next(e);
     }
 }));
+exports.catalogRoute.put('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const productId = req.params.id;
+        const body = req.body;
+        const users = yield catalog_service_1.catalogService.changeProduct(productId, req.user.id, body);
+        res.send(users);
+    }
+    catch (e) {
+        next(e);
+    }
+}));
 //# sourceMappingURL=catalog-route.js.map
