@@ -19,7 +19,7 @@ export const briefcaseRepositories = {
     },
     async createOrder(idBriefcase: string, body: BriefcaseOrder): Promise<BriefcaseOrder>{
        await briefcaseCollection.updateOne({id: idBriefcase},{$addToSet: {orders: body}})
-       await clientCollection.updateOne({id: body.clientId}, { $set: {dateLastOrder: body.createdDate}})
+       await clientCollection.updateOne({id: body.clientId}, { $push : {order: body}})
         return body
      },
      async removeBriefcase(id: string): Promise<void>{

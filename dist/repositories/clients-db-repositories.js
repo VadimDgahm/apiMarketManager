@@ -42,7 +42,7 @@ exports.clientsRepositories = {
     },
     createClient(body) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield db_1.clientCollection.insertOne(body);
+            yield db_1.clientCollection.insertOne(body);
             return body;
         });
     },

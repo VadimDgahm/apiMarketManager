@@ -36,7 +36,7 @@ export const clientsRepositories = {
        
     },
     async createClient(body: ClientType): Promise<ClientType> {
-        const result = await clientCollection.insertOne(body)
+        await clientCollection.insertOne(body)
         return body
     },
     async getClientById(id: string, userId: string): Promise<ClientType | undefined> {

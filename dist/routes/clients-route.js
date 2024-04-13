@@ -27,7 +27,6 @@ clientsRoute.post('/', (req, res) => {
 });
 // @ts-ignore
 clientsRoute.get('/:id', (req, res) => {
-    let clientRes = {};
     clients_service_1.clientsService.getClientById(req.params.id, req.user.id).then(client => {
         res.send(client);
     }).catch(e => res.status(404).send({ message: ['not Found', e.messages] }));

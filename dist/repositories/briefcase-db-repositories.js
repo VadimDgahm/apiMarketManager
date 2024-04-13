@@ -31,7 +31,7 @@ exports.briefcaseRepositories = {
     createOrder(idBriefcase, body) {
         return __awaiter(this, void 0, void 0, function* () {
             yield db_1.briefcaseCollection.updateOne({ id: idBriefcase }, { $addToSet: { orders: body } });
-            yield db_1.clientCollection.updateOne({ id: body.clientId }, { $set: { dateLastOrder: body.createdDate } });
+            yield db_1.clientCollection.updateOne({ id: body.clientId }, { $push: { order: body } });
             return body;
         });
     },

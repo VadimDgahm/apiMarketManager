@@ -2,6 +2,7 @@ import {clientsRepositories} from '../repositories/clients-db-repositories';
 import {QueryResponse} from '../routes/clients-route';
 import {v4 as uuidv4} from 'uuid';
 import { getCurrentDate } from '../utils/utils';
+import { BriefcaseOrder } from './briefcase-service';
 
 export const clientsService = {
     async findClients(title: QueryResponse, id: string, page: number, pageSize: number): Promise<{clients: ClientType[], totalCount: number}> {
@@ -19,7 +20,7 @@ export const clientsService = {
             phones,
             addresses: [],
             comments,
-            dateLastOrder: '',
+            order: [],
             createdDate: currentDate,
             userId
         }
@@ -66,7 +67,7 @@ export type ClientType = {
     source: string
     phones: PhoneClient[]
     addresses: AddressClient[]
-    dateLastOrder: string
+    order: BriefcaseOrder[]
     comments: string[]
     createdDate: string
     userId: string

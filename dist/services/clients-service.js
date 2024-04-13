@@ -30,7 +30,7 @@ exports.clientsService = {
                 phones,
                 addresses: [],
                 comments,
-                dateLastOrder: '',
+                order: [],
                 createdDate: currentDate,
                 userId
             };
