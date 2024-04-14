@@ -19,7 +19,7 @@ exports.clientsService = {
             return yield clients_db_repositories_1.clientsRepositories.findClients(title, id, page, pageSize);
         });
     },
-    createClient({ name, status = 'новый', source = 'неопределен', phones, comments }, userId) {
+    createClient({ name, status = 'новый', phones, comments, addresses }, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const currentDate = (0, utils_1.getCurrentDate)();
             const body = {
@@ -28,7 +28,7 @@ exports.clientsService = {
                 status,
                 source: null,
                 phones,
-                addresses: [],
+                addresses: addresses.length ? addresses : [],
                 comments,
                 order: [],
                 createdDate: currentDate,
