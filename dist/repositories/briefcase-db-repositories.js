@@ -14,12 +14,20 @@ const db_1 = require("./db");
 exports.briefcaseRepositories = {
     getBriefcase(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield db_1.briefcaseCollection.find({ userId }).toArray();
+            const briefcase = yield db_1.briefcaseCollection.find({ userId }).toArray();
+            if (briefcase) {
+                return briefcase.reverse();
+            }
+            else {
+                return [];
+            }
         });
     },
     getBriefcaseById(briefcaseId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield db_1.briefcaseCollection.findOne({ id: briefcaseId, userId });
+            const briefcase = yield db_1.briefcaseCollection.findOne({ id: briefcaseId, userId });
+            briefcase.orders.reverse();
+            return briefcase;
         });
     },
     createBriefcase(order) {
@@ -43,8 +51,6 @@ exports.briefcaseRepositories = {
     getPurchases(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const res = yield db_1.briefcaseCollection.findOne({ id });
-            if (res) {
-            }
         });
     },
     removeOrder(idBriefcase, orderId) {
@@ -52,6 +58,7 @@ exports.briefcaseRepositories = {
             const res = yield db_1.briefcaseCollection.findOne({ id: idBriefcase });
             if (res) {
                 const order = res.orders.find((o) => o.orderId === orderId);
+                yield db_1.clientCollection.updateOne({ id: order.clientId }, { $pull: { order: { orderId } } });
                 yield db_1.briefcaseCollection.updateOne({ id: idBriefcase }, { $pull: { orders: { orderId } } });
                 if (order) {
                     return order;
@@ -62,6 +69,20 @@ exports.briefcaseRepositories = {
     changeBriefcase(idBriefcase, body, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield db_1.briefcaseCollection.findOneAndUpdate({ id: idBriefcase, userId }, { $set: { name: body.name } });
+        });
+    },
+    updateOrderClient(idBriefcase, body, orderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const briefcase = yield db_1.briefcaseCollection.findOne({ id: idBriefcase });
+            const orderIndex = briefcase.orders.findIndex(order => orderId === order.orderId);
+            const client = yield db_1.clientCollection.findOne({ id: briefcase.orders[orderIndex].clientId });
+            if (briefcase && client) {
+                const updateArr = briefcase.orders.map(order => order.orderId === orderId ? Object.assign(Object.assign({}, order), body) : order);
+                const updateArrForCLient = client.order.map(order => order.orderId === orderId ? Object.assign(Object.assign({}, order), body) : order);
+                yield db_1.clientCollection.findOneAndUpdate({ id: briefcase.orders[orderIndex].clientId }, { $set: { order: updateArrForCLient } });
+                return yield db_1.briefcaseCollection.findOneAndUpdate({ id: idBriefcase }, { $set: { orders: updateArr } });
+            }
+            return false;
         });
     },
 };

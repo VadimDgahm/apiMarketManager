@@ -26,10 +26,13 @@ export const briefcaseService = {
         const body: BriefcaseOrder = {
             orderId: v4(),
             clientName: data.clientName,
+            address: data.address,
             clientId: data.idClient,
             createdDate: getCurrentDate(),
-            orderClient: data.orders
-            
+            orderClient: data.orders,
+            dayDelivery: data.dayDelivery,
+            timeDelivery: data.timeDelivery,
+            addressId: data.addressId
         }
         return await briefcaseRepositories.createOrder(idBriefcase, body)
     },
@@ -45,6 +48,10 @@ export const briefcaseService = {
     async changeBriefcase (idBriefcase: string, body: BriefcaseType, userId: string) {
     return await briefcaseRepositories.changeBriefcase(idBriefcase, body, userId)
     },
+
+    async updateOrderClient (idBriefcase: string, body: BriefcaseType, orderId: string) {
+        return await briefcaseRepositories.updateOrderClient(idBriefcase, body, orderId)
+        },
 }
 
 
@@ -67,8 +74,12 @@ export type OrderType = {
   };
   export type OrderClientType = {
     idClient: string;
+    address: string;
     clientName: string
     orders: OrderType[];
+    timeDelivery: string,
+    dayDelivery: string,
+    addressId: string,
   };
 
   export type BriefcaseOrder = 
@@ -76,8 +87,11 @@ export type OrderType = {
         clientName: string
         orderId: string,
         clientId: string,
+        address: string,
         createdDate: string
         orderClient: OrderType[]
-        
+        timeDelivery:string,
+        dayDelivery: string,
+        addressId: string        
     }
   

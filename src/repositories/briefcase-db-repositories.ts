@@ -1,4 +1,3 @@
-import {NextFunction} from 'express';
 import { briefcaseCollection, clientCollection } from './db';
 import { BriefcaseOrder, BriefcaseType } from '../services/briefcase-service';
 
@@ -8,10 +7,18 @@ type GetUserType = {
 }
 export const briefcaseRepositories = {
     async getBriefcase(userId: string) {
-     return await briefcaseCollection.find({userId}).toArray()
+        const briefcase = await briefcaseCollection.find({userId}).toArray()
+        if(briefcase) {
+            return briefcase.reverse()
+        }
+        else{
+            return []
+        }
     },
     async getBriefcaseById(briefcaseId: string, userId: string) {
-        return await briefcaseCollection.findOne({id:briefcaseId, userId})
+        const briefcase = await briefcaseCollection.findOne({id:briefcaseId, userId})
+        briefcase.orders.reverse()
+        return briefcase
     },
     async createBriefcase(order: BriefcaseType): Promise<BriefcaseType>{
        await briefcaseCollection.insertOne(order)
@@ -27,15 +34,13 @@ export const briefcaseRepositories = {
       },
       async getPurchases(id: string): Promise<void>{
         const res = await briefcaseCollection.findOne({id})
-        if(res){
-            
-        }
     },
     async removeOrder(idBriefcase: string, orderId: string): Promise<any>{
         const res = await briefcaseCollection.findOne({id: idBriefcase})
         
         if(res){
             const order = res.orders.find((o) => o.orderId === orderId);
+            await clientCollection.updateOne({id: order.clientId}, {$pull: {order: {orderId}}})
              await briefcaseCollection.updateOne(
                 { id: idBriefcase },
                 { $pull: { orders: { orderId } } }
@@ -49,6 +54,18 @@ export const briefcaseRepositories = {
 
         return await briefcaseCollection.findOneAndUpdate({id: idBriefcase, userId}, { $set: {name: body.name} })
       
+    },
+    async updateOrderClient(idBriefcase: string,  body: BriefcaseType, orderId: string): Promise<any>{
+        const briefcase = await briefcaseCollection.findOne({id: idBriefcase})
+        const orderIndex = briefcase.orders.findIndex(order => orderId === order.orderId)
+        const client = await clientCollection.findOne({id: briefcase.orders[orderIndex].clientId})
+        if(briefcase && client){
+            const updateArr = briefcase.orders.map(order => order.orderId === orderId ? {...order, ...body} : order)
+            const updateArrForCLient  = client.order.map(order => order.orderId === orderId ? {...order, ...body} : order)
+            await clientCollection.findOneAndUpdate({id: briefcase.orders[orderIndex].clientId}, {$set: {order: updateArrForCLient}})
+            return await briefcaseCollection.findOneAndUpdate({id: idBriefcase}, {$set: {orders: updateArr}})
+        }
+        return false
     },
      
 }

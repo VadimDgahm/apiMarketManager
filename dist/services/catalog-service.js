@@ -18,12 +18,11 @@ exports.catalogService = {
             return yield catalog_db_repositories_1.catalogRepositories.getCatalog();
         });
     },
-    createProduct({ name, price, type, userId, view, reductionName }) {
+    createProduct({ name, type, userId, view, reductionName }) {
         return __awaiter(this, void 0, void 0, function* () {
             const body = {
                 id: (0, uuid_1.v4)(),
                 name,
-                price,
                 type,
                 view,
                 userId,

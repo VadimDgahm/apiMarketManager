@@ -7,13 +7,15 @@ export const clientsRepositories = {
     async findClients(title: QueryResponse, id: string, page: number, pageSize: number): Promise<{clients: ClientType[], totalCount: number}> {
 
         const userClients = (await clientCollection.find({userId: id}).toArray()).reverse()
-        const startIndex = (page - 1) * pageSize;
-        const endIndex = startIndex + pageSize;
-        const paginatedClients = userClients.slice(startIndex, endIndex);
+       
+     
         
        
      
        if(userClients){
+        const startIndex = (page - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedClients = userClients.slice(startIndex, endIndex);
         if (title) {
             const finishArr = userClients.filter( el =>{
                 const nameMatch = el.name.includes(title)

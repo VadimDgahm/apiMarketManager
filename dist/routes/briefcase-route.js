@@ -72,6 +72,17 @@ exports.briefcaseRoute.delete('/:id/orders/:orderId', (req, res) => __awaiter(vo
     else
         res.status(500).send('not remove');
 }));
+exports.briefcaseRoute.put('/:id/orders/:orderId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const idBriefcase = req.params.id;
+    const orderId = req.params.orderId;
+    const body = req.body;
+    if (idBriefcase && orderId) {
+        const order = yield briefcase_service_1.briefcaseService.updateOrderClient(idBriefcase, body, orderId);
+        res.send(order);
+    }
+    else
+        res.status(500).send('not remove');
+}));
 exports.briefcaseRoute.put('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const idBriefcase = req.params.id;
     const body = req.body;
