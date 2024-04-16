@@ -20,7 +20,8 @@ export const clientsRepositories = {
             const finishArr = userClients.filter( el =>{
                 const nameMatch = el.name.includes(title)
                 const phoneMatch = el.phones.some(phone => phone.tel.includes(title) )
-                return nameMatch || phoneMatch
+                const addressMatch = el.addresses.some(address => address.street.includes(title))
+                return nameMatch || phoneMatch || addressMatch
             } )
             const paginatedFinishArr = finishArr.slice(startIndex, endIndex);
             return { clients: paginatedFinishArr, totalCount: finishArr.length}

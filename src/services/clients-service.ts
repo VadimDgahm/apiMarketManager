@@ -9,14 +9,14 @@ export const clientsService = {
         return await clientsRepositories.findClients(title, id,page,pageSize)
     },
 
-    async createClient({name, status = 'новый', phones,comments,addresses}: CreateClientProps, userId: string): Promise<ClientType> {
+    async createClient({name, status = 'новый', source, phones,comments,addresses}: CreateClientProps, userId: string): Promise<ClientType> {
 
         const currentDate = getCurrentDate()
         const body: ClientType = {
             id: uuidv4(),
             name,
             status,
-            source: null,
+            source,
             phones,
             addresses: addresses.length ? addresses : [] ,
             comments,
