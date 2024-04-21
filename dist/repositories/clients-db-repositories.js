@@ -21,9 +21,9 @@ exports.clientsRepositories = {
                 const paginatedClients = userClients.slice(startIndex, endIndex);
                 if (title) {
                     const finishArr = userClients.filter(el => {
-                        const nameMatch = el.name.includes(title);
+                        const nameMatch = el.name.toLocaleLowerCase().includes(title.toLocaleLowerCase());
                         const phoneMatch = el.phones.some(phone => phone.tel.includes(title));
-                        const addressMatch = el.addresses.some(address => address.street.includes(title));
+                        const addressMatch = el.addresses.some(address => address.street.toLocaleLowerCase().includes(title.toLocaleLowerCase()));
                         return nameMatch || phoneMatch || addressMatch;
                     });
                     const paginatedFinishArr = finishArr.slice(startIndex, endIndex);
