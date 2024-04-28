@@ -22,5 +22,11 @@ exports.addressRepositories = {
             return yield db_1.clientCollection.updateOne({ id }, { $pull: { addresses: { idAddress } } });
         });
     },
+    updateAddress(body, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.removeAddress(body.idAddress, id);
+            return yield this.createAddress(body, id);
+        });
+    },
 };
 //# sourceMappingURL=address-db-repositories.js.map

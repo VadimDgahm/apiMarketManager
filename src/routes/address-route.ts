@@ -34,3 +34,18 @@ addressRoute.delete('/:id',
         next(e)
     }
 },);
+
+addressRoute.put('/:id',
+    async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const body = req.body
+        const idClient = req.params.id
+        if(idClient){
+            const address =  await addressService.updateAddress(body, idClient )
+            res.send(address)
+        }
+       
+    } catch (e) {
+        next(e)
+    }
+},);

@@ -24,5 +24,10 @@ exports.addressService = {
             return yield address_db_repositories_1.addressRepositories.removeAddress(idAddress, id);
         });
     },
+    updateAddress(body, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield address_db_repositories_1.addressRepositories.updateAddress(body, id);
+        });
+    },
 };
 //# sourceMappingURL=address-service.js.map

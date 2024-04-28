@@ -54,7 +54,6 @@ exports.authService = {
                 throw api_error_1.default.BadRequest(`Неверный пароль`);
             }
             const payload = { id: user.id, email, isActivated: user.isActivated };
-            yield token_service_1.tokenService.removeToken(payload.id);
             const tokens = token_service_1.tokenService.generationTokens(Object.assign({}, payload));
             yield token_service_1.tokenService.saveToken(payload.id, tokens.refreshToken);
             return Object.assign(Object.assign({}, tokens), { user: Object.assign({}, payload) });

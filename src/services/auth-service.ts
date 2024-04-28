@@ -36,7 +36,6 @@ export const authService = {
             throw ApiErrors.BadRequest(`Неверный пароль`)
         }
         const payload = {id: user.id, email, isActivated: user.isActivated}
-        await tokenService.removeToken(payload.id)
         const tokens = tokenService.generationTokens({...payload})
         await tokenService.saveToken(payload.id, tokens.refreshToken)
         return {...tokens, user: {...payload}}

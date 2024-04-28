@@ -39,4 +39,17 @@ exports.addressRoute.delete('/:id', (req, res, next) => __awaiter(void 0, void 0
         next(e);
     }
 }));
+exports.addressRoute.put('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const body = req.body;
+        const idClient = req.params.id;
+        if (idClient) {
+            const address = yield address_service_1.addressService.updateAddress(body, idClient);
+            res.send(address);
+        }
+    }
+    catch (e) {
+        next(e);
+    }
+}));
 //# sourceMappingURL=address-route.js.map

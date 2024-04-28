@@ -15,7 +15,10 @@ export const addressService = {
     },
     async removeAddress(idAddress:string, id:string) {
          return await addressRepositories.removeAddress(idAddress, id)
-     },
+     }, 
+     async updateAddress(body: AddressClient , id:string) {
+        return await addressRepositories.updateAddress(body, id)
+    },
 }
 
 
