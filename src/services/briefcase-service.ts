@@ -3,14 +3,39 @@ import {QueryResponse} from '../routes/clients-route';
 import {v4 as uuidv4, v4} from 'uuid';
 import { getCurrentDate } from '../utils/utils';
 import { briefcaseRepositories } from '../repositories/briefcase-db-repositories';
+import { clientCollection } from '../repositories/db';
 
 export const briefcaseService = {
     async getBriefcase(userId: string) {
         return await briefcaseRepositories.getBriefcase(userId)
     },
-    async getBriefcaseById(briefcaseId: string, userId: string){
-        return await briefcaseRepositories.getBriefcaseById(briefcaseId,userId)
-    },
+    // async getBriefcaseById(briefcaseId: string, userId: string){
+    //     const briefcase = await briefcaseRepositories.getBriefcaseById(briefcaseId,userId)
+    //    return await briefcase.orders.map(async(order) => {
+    //        const client = await clientCollection.findOne({id: order.clientId,userId})
+    //         return {...order, dataClient: client}
+    //     })
+    // },
+    async getBriefcaseById(briefcaseId: string, userId: string) {
+        const briefcase = await briefcaseRepositories.getBriefcaseById(briefcaseId, userId);
+        const processedOrders = await Promise.all(
+          briefcase.orders.map(async (order) => {
+            const client = await clientCollection.findOne({ id: order.clientId, userId });
+            const dataClient = {
+                name: client.name,
+                status: client.status,
+                source: client.source,
+                phones: client.phones,
+                addresses: client.addresses
+            }
+            const processedOrder = { ...order, dataClient };
+            // Выполните любые другие необходимые операции с обработанным заказом
+            return processedOrder;
+          })
+        );
+      
+        return { ...briefcase,orders: processedOrders};
+      },
     async createBriefcase({name}:RequestCreateBriefcase, userId: string) {
         const body: BriefcaseType = {
             id: v4(),
