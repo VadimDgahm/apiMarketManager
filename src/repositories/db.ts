@@ -4,6 +4,7 @@ import {UserType} from '../services/auth-service';
 import {UserRefreshToken} from '../services/token-service';
 import { BriefcaseType } from "../services/briefcase-service";
 import { ProductType } from "../services/catalog-service";
+import {deliveryRouteType} from "../services/delivery-routes-service";
 
 const password = process.env.DB_PASSWORD
 const login = process.env.DB_LOGIN
@@ -23,6 +24,7 @@ export const usersCollection = db.collection<UserType>('users')
 export const refreshTokenCollection = db.collection<UserRefreshToken>('refreshToken')
 export const briefcaseCollection = db.collection<BriefcaseType>('briefcase')
 export const catalogCollection = db.collection<ProductType>('catalog')
+export const deliveryRoutesCollection = db.collection<deliveryRouteType>('deliveryRoutes')
 
 
 export async  function  runDb() {

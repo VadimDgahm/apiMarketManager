@@ -69,7 +69,8 @@ exports.briefcaseService = {
                 orderClient: data.orders,
                 dayDelivery: data.dayDelivery,
                 timeDelivery: data.timeDelivery,
-                addressId: data.addressId
+                addressId: data.addressId,
+                deliveryRoute: null
             };
             return yield briefcase_db_repositories_1.briefcaseRepositories.createOrder(idBriefcase, body);
         });
@@ -97,6 +98,11 @@ exports.briefcaseService = {
     updateOrderClient(idBriefcase, body, orderId) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield briefcase_db_repositories_1.briefcaseRepositories.updateOrderClient(idBriefcase, body, orderId);
+        });
+    },
+    updateOrderDeliveryRoute(idBriefcase, body, orderId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield briefcase_db_repositories_1.briefcaseRepositories.updateOrderDeliveryRoute(idBriefcase, body, orderId);
         });
     },
 };
