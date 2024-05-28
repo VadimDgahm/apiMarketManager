@@ -57,7 +57,8 @@ export const briefcaseService = {
             orderClient: data.orders,
             dayDelivery: data.dayDelivery,
             timeDelivery: data.timeDelivery,
-            addressId: data.addressId
+            addressId: data.addressId,
+            deliveryRoute: null
         }
         return await briefcaseRepositories.createOrder(idBriefcase, body)
     },
@@ -77,8 +78,10 @@ export const briefcaseService = {
     async updateOrderClient (idBriefcase: string, body: BriefcaseType, orderId: string) {
         return await briefcaseRepositories.updateOrderClient(idBriefcase, body, orderId)
         },
+    async updateOrderDeliveryRoute (idBriefcase: string, body: OrderDeliveryRouteReqType, orderId: string) {
+      return await briefcaseRepositories.updateOrderDeliveryRoute(idBriefcase, body, orderId)
+    },
 }
-
 
 export type BriefcaseType = {
     name: string
@@ -97,26 +100,36 @@ export type OrderType = {
     quantity: string;
     reductionName: string;
   };
-  export type OrderClientType = {
-    idClient: string;
-    address: string;
-    clientName: string
-    orders: OrderType[];
-    timeDelivery: string,
-    dayDelivery: string,
-    addressId: string,
-  };
+export type OrderDeliveryRouteType = {
+   _id: string;
+   name: string;
+};
 
-  export type BriefcaseOrder = 
-    {
-        clientName: string
-        orderId: string,
-        clientId: string,
-        address: string,
-        createdDate: string
-        orderClient: OrderType[]
-        timeDelivery:string,
-        dayDelivery: string,
-        addressId: string        
-    }
+export type OrderDeliveryRouteReqType = {
+  oldDeliveryRouteId: string
+} & OrderDeliveryRouteType;
+
+export type OrderClientType = {
+  idClient: string;
+  address: string;
+  clientName: string
+  orders: OrderType[];
+  timeDelivery: string,
+  dayDelivery: string,
+  addressId: string,
+};
+
+export type BriefcaseOrder = {
+  clientName: string
+  orderId: string,
+  clientId: string,
+  address: string,
+  createdDate: string
+  orderClient: OrderType[]
+  timeDelivery: string,
+  dayDelivery: string,
+  addressId: string,
+  deliveryRoute: OrderDeliveryRouteType | null,
+  dataClient?: object
+}
   

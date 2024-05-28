@@ -14,6 +14,7 @@ import { briefcaseRoute } from "./routes/briefcase-route";
 import { catalogRoute } from "./routes/catalog-route";
 import { addressRoute } from "./routes/address-route";
 import { phoneRoute } from "./routes/phone-route";
+import {deliveryRoutesRoute} from "./routes/deliveryRoutes-route";
 
 
 dotenv.config()
@@ -50,6 +51,7 @@ app.use('/address',authMiddleware, addressRoute)
 app.use('/catalog',authMiddleware,isActivationMiddleware, catalogRoute)
 // @ts-ignore
 app.use('/phone',authMiddleware, phoneRoute)
+app.use('/deliveryRoute',authMiddleware, deliveryRoutesRoute)
 app.use(errorMiddleware)
 
 
