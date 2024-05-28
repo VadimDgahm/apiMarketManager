@@ -56,6 +56,7 @@ app.use('/address', auth_middleware_1.authMiddleware, address_route_1.addressRou
 app.use('/catalog', auth_middleware_1.authMiddleware, checkActivation_middleware_1.isActivationMiddleware, catalog_route_1.catalogRoute);
 // @ts-ignore
 app.use('/phone', auth_middleware_1.authMiddleware, phone_route_1.phoneRoute);
+// @ts-ignore
 app.use('/deliveryRoute', auth_middleware_1.authMiddleware, deliveryRoutes_route_1.deliveryRoutesRoute);
 app.use(error_middleware_1.default);
 const startApp = () => __awaiter(void 0, void 0, void 0, function* () {
