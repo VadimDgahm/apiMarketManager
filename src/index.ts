@@ -51,6 +51,7 @@ app.use('/address',authMiddleware, addressRoute)
 app.use('/catalog',authMiddleware,isActivationMiddleware, catalogRoute)
 // @ts-ignore
 app.use('/phone',authMiddleware, phoneRoute)
+// @ts-ignore
 app.use('/deliveryRoute',authMiddleware, deliveryRoutesRoute)
 app.use(errorMiddleware)
 
