@@ -86,7 +86,7 @@ export const briefcaseRepositories = {
       if (OldDeliveryRoute) {
         const OldDeliveryRouteIndex = OldDeliveryRoute.briefcases.findIndex(briefcase => briefcase.id === idBriefcase)
         OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds = OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.filter(
-          oId => oId !== orderId
+          oId => oId.orderId !== orderId
         )
 
         if (OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.length === 0) {
@@ -101,18 +101,20 @@ export const briefcaseRepositories = {
     const newDeliveryRoute = await deliveryRoutesCollection.findOne({_id: new ObjectId(body._id)});
     const deliveryRouteIndex = newDeliveryRoute?.briefcases?.findIndex(briefcase => briefcase.id === idBriefcase)
 
+    const newOrderIdObj = {orderId:orderId, sort:0};
+
     if (isFinite(deliveryRouteIndex) && deliveryRouteIndex !== -1) {
-      newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(orderId);
-    } else if(newDeliveryRoute.briefcases?.length >= 0){
-      newDeliveryRoute.briefcases.push({id: idBriefcase, orderIds: [orderId]});
+      newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(newOrderIdObj);
+    } else if(newDeliveryRoute.briefcases?.length >= 0) {
+      newDeliveryRoute.briefcases.push({id: idBriefcase, orderIds: [newOrderIdObj]});
     } else {
-      newDeliveryRoute.briefcases = [{id: idBriefcase, orderIds: [orderId]}];
+      newDeliveryRoute.briefcases = [{id: idBriefcase, orderIds: [newOrderIdObj]}];
     }
 
     if (briefcase && newDeliveryRoute) {
       briefcase.orders[orderIndex].deliveryRoute = {_id:body._id, name:body.name};
 
-      await deliveryRoutesCollection.findOneAndUpdate({_id: newDeliveryRoute._id}, {$set: {briefcases: newDeliveryRoute.briefcases}});
+      await deliveryRoutesCollection.findOneAndUpdate({_id: newDeliveryRoute._id}, {$set: newDeliveryRoute});
       return await briefcaseCollection.findOneAndUpdate({id: idBriefcase}, {$set: {orders: briefcase.orders}});
     }
   }

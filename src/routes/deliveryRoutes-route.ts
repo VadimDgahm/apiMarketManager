@@ -53,3 +53,13 @@ deliveryRoutesRoute.put('/:id', async (req: AuthenticatedRequest, res: Response,
     next(e)
   }
 },);
+
+deliveryRoutesRoute.put('/sort/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const body = req.body
+    const deliveryRoute = await deliveryRoutesService.sortDeliveryRoute(body)
+    res.send(deliveryRoute)
+  } catch (e) {
+    next(e)
+  }
+},);

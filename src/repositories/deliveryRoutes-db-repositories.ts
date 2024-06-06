@@ -1,6 +1,7 @@
 import {briefcaseCollection, clientCollection, deliveryRoutesCollection} from './db';
 import {DeliveryRouteRequest, DeliveryRouteResponse, deliveryRouteType} from "../services/delivery-routes-service";
 import {ObjectId} from "mongodb";
+import {BriefcaseOrder} from "../services/briefcase-service";
 
 export const deliveryRoutesRepositories = {
   async getDeliveryRoutes() {
@@ -16,7 +17,19 @@ export const deliveryRoutesRepositories = {
     if (deliveryRoute?.briefcases && deliveryRoute?.briefcases?.length >= 0) {
       for (const deliveryRouteBriefcase of deliveryRoute.briefcases) {
         const briefcase = await briefcaseCollection.findOne({id: deliveryRouteBriefcase.id})
-        const orders = briefcase.orders.filter(order => deliveryRouteBriefcase.orderIds.includes(order.orderId));
+        const orders: BriefcaseOrder[] = [];
+
+        for (const deliveryRouteOrderId of deliveryRouteBriefcase.orderIds) {
+          orders.push(...briefcase.orders.filter(order => {
+            if(order.orderId === deliveryRouteOrderId.orderId) {
+              order.sort = deliveryRouteOrderId.sort;
+              order.briefcaseId = deliveryRouteBriefcase.id;
+              return order;
+            }
+          }));
+        }
+
+        // const orders = briefcase.orders.filter(order => deliveryRouteBriefcase.orderIds.includes(order.orderId));
 
         for (const order of orders) {
           const client = await clientCollection.findOne({id: order.clientId});
@@ -33,6 +46,12 @@ export const deliveryRoutesRepositories = {
       }
     }
 
+    const sortOrder = (a: BriefcaseOrder, b: BriefcaseOrder) => {
+      return (a.sort > b.sort) ? 1 : -1;
+    }
+
+    result.orders.sort(sortOrder);
+
     return result
   },
   async createDeliveryRoute(body: deliveryRouteType) {
@@ -43,5 +62,8 @@ export const deliveryRoutesRepositories = {
   },
   async updateDeliveryRoute(id: string, body: DeliveryRouteRequest) {
     return await deliveryRoutesCollection.findOneAndUpdate({_id: new ObjectId(body._id)}, {$set: {name: body.name}})
+  },
+  async sortDeliveryRoute(body: deliveryRouteType) {
+    return await deliveryRoutesCollection.findOneAndUpdate({_id: new ObjectId(body._id)}, {$set: {briefcases: body.briefcases}})
   }
 }
