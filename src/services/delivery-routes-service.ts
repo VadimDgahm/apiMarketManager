@@ -14,7 +14,7 @@ export const deliveryRoutesService = {
     const body: deliveryRouteType = {
       name,
       createdDate: getCurrentDate(),
-      briefcases: []
+      briefcases: [],
     }
 
     return await deliveryRoutesRepositories.createDeliveryRoute(body)
@@ -24,6 +24,9 @@ export const deliveryRoutesService = {
   },
   async updateDeliveryRoute(deliveryRouteId: string, body: DeliveryRouteRequest) {
     return await deliveryRoutesRepositories.updateDeliveryRoute(deliveryRouteId, body)
+  },
+  async sortDeliveryRoute(body: deliveryRouteType) {
+    return await deliveryRoutesRepositories.sortDeliveryRoute(body)
   }
 }
 
@@ -31,12 +34,12 @@ export type deliveryRouteType = {
   _id?: ObjectId,
   name: string,
   createdDate: string,
-  briefcases: BriefcasesDeliveryRouteType[]
+  briefcases: BriefcasesDeliveryRouteType[],
 }
 
 export type BriefcasesDeliveryRouteType = {
   id: string,
-  orderIds: string[]
+  orderIds: {orderId: string, sort: number}[]
 }
 
 export type DeliveryRouteRequest = {

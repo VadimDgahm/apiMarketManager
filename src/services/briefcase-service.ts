@@ -130,6 +130,8 @@ export type BriefcaseOrder = {
   dayDelivery: string,
   addressId: string,
   deliveryRoute: OrderDeliveryRouteType | null,
-  dataClient?: object
+  dataClient?: object,
+  sort?: number,
+  briefcaseId? : string
 }
   
