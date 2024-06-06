@@ -13,8 +13,7 @@ exports.runDb = exports.deliveryRoutesCollection = exports.catalogCollection = e
 const mongodb_1 = require("mongodb");
 const password = process.env.DB_PASSWORD;
 const login = process.env.DB_LOGIN;
-// const mongoUri = `mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0` || "mongodb://0.0.0.0:27037"
-const mongoUri = "mongodb://localhost:27017";
+const mongoUri = `mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0` || "mongodb://0.0.0.0:27037";
 const client = new mongodb_1.MongoClient(mongoUri, {
     serverApi: {
         version: mongodb_1.ServerApiVersion.v1,

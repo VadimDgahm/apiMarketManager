@@ -62,14 +62,4 @@ exports.deliveryRoutesRoute.put('/:id', (req, res, next) => __awaiter(void 0, vo
         next(e);
     }
 }));
-exports.deliveryRoutesRoute.put('/sort/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const body = req.body;
-        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.sortDeliveryRoute(body);
-        res.send(deliveryRoute);
-    }
-    catch (e) {
-        next(e);
-    }
-}));
 //# sourceMappingURL=deliveryRoutes-route.js.map
