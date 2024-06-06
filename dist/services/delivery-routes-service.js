@@ -28,7 +28,7 @@ exports.deliveryRoutesService = {
             const body = {
                 name,
                 createdDate: (0, utils_1.getCurrentDate)(),
-                briefcases: [],
+                briefcases: []
             };
             return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.createDeliveryRoute(body);
         });
@@ -41,11 +41,6 @@ exports.deliveryRoutesService = {
     updateDeliveryRoute(deliveryRouteId, body) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.updateDeliveryRoute(deliveryRouteId, body);
-        });
-    },
-    sortDeliveryRoute(body) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.sortDeliveryRoute(body);
         });
     }
 };
