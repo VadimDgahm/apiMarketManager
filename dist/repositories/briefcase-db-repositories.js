@@ -96,7 +96,7 @@ exports.briefcaseRepositories = {
                 const OldDeliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(body.oldDeliveryRouteId) });
                 if (OldDeliveryRoute) {
                     const OldDeliveryRouteIndex = OldDeliveryRoute.briefcases.findIndex(briefcase => briefcase.id === idBriefcase);
-                    OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds = OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.filter(oId => oId !== orderId);
+                    OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds = OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.filter(oId => oId.orderId !== orderId);
                     if (OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.length === 0) {
                         OldDeliveryRoute.briefcases = OldDeliveryRoute.briefcases.filter(briefcase => briefcase.id !== idBriefcase);
                     }
@@ -106,18 +106,19 @@ exports.briefcaseRepositories = {
             // Add a new order to the delivery route
             const newDeliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(body._id) });
             const deliveryRouteIndex = (_a = newDeliveryRoute === null || newDeliveryRoute === void 0 ? void 0 : newDeliveryRoute.briefcases) === null || _a === void 0 ? void 0 : _a.findIndex(briefcase => briefcase.id === idBriefcase);
+            const newOrderIdObj = { orderId: orderId, sort: 0 };
             if (isFinite(deliveryRouteIndex) && deliveryRouteIndex !== -1) {
-                newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(orderId);
+                newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(newOrderIdObj);
             }
             else if (((_b = newDeliveryRoute.briefcases) === null || _b === void 0 ? void 0 : _b.length) >= 0) {
-                newDeliveryRoute.briefcases.push({ id: idBriefcase, orderIds: [orderId] });
+                newDeliveryRoute.briefcases.push({ id: idBriefcase, orderIds: [newOrderIdObj] });
             }
             else {
-                newDeliveryRoute.briefcases = [{ id: idBriefcase, orderIds: [orderId] }];
+                newDeliveryRoute.briefcases = [{ id: idBriefcase, orderIds: [newOrderIdObj] }];
             }
             if (briefcase && newDeliveryRoute) {
                 briefcase.orders[orderIndex].deliveryRoute = { _id: body._id, name: body.name };
-                yield db_1.deliveryRoutesCollection.findOneAndUpdate({ _id: newDeliveryRoute._id }, { $set: { briefcases: newDeliveryRoute.briefcases } });
+                yield db_1.deliveryRoutesCollection.findOneAndUpdate({ _id: newDeliveryRoute._id }, { $set: newDeliveryRoute });
                 return yield db_1.briefcaseCollection.findOneAndUpdate({ id: idBriefcase }, { $set: { orders: briefcase.orders } });
             }
         });
