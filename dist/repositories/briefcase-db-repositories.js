@@ -106,7 +106,7 @@ exports.briefcaseRepositories = {
             // Add a new order to the delivery route
             const newDeliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(body._id) });
             const deliveryRouteIndex = (_a = newDeliveryRoute === null || newDeliveryRoute === void 0 ? void 0 : newDeliveryRoute.briefcases) === null || _a === void 0 ? void 0 : _a.findIndex(briefcase => briefcase.id === idBriefcase);
-            const newOrderIdObj = { orderId: orderId, sort: 0 };
+            const newOrderIdObj = { orderId: orderId, sort: Math.floor(Date.now() / 1000) };
             if (isFinite(deliveryRouteIndex) && deliveryRouteIndex !== -1) {
                 newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(newOrderIdObj);
             }
