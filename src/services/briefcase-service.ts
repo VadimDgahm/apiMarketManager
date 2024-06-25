@@ -133,5 +133,6 @@ export type BriefcaseOrder = {
   dataClient?: object,
   sort?: number,
   briefcaseId? : string
+  time?: string
 }
   

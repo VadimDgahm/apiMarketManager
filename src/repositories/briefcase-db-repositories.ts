@@ -101,7 +101,7 @@ export const briefcaseRepositories = {
     const newDeliveryRoute = await deliveryRoutesCollection.findOne({_id: new ObjectId(body._id)});
     const deliveryRouteIndex = newDeliveryRoute?.briefcases?.findIndex(briefcase => briefcase.id === idBriefcase)
 
-    const newOrderIdObj = {orderId:orderId, sort:Math.floor(Date.now() / 1000)};
+    const newOrderIdObj = {orderId:orderId, sort:Math.floor(Date.now() / 1000), time: ''};
 
     if (isFinite(deliveryRouteIndex) && deliveryRouteIndex !== -1) {
       newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(newOrderIdObj);
