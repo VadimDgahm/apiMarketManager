@@ -24,6 +24,7 @@ export const deliveryRoutesRepositories = {
             if(order.orderId === deliveryRouteOrderId.orderId) {
               order.sort = deliveryRouteOrderId.sort;
               order.briefcaseId = deliveryRouteBriefcase.id;
+              order.time = deliveryRouteOrderId.time;
               return order;
             }
           }));
