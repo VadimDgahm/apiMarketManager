@@ -104,7 +104,12 @@ export const briefcaseRepositories = {
     const newOrderIdObj = {orderId:orderId, sort:Math.floor(Date.now() / 1000), time: ''};
 
     if (isFinite(deliveryRouteIndex) && deliveryRouteIndex !== -1) {
-      newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(newOrderIdObj);
+      const isExist = newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.find(
+        item => item.orderId === newOrderIdObj.orderId
+      );
+      if(!isExist) {
+        newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(newOrderIdObj);
+      }
     } else if(newDeliveryRoute.briefcases?.length >= 0) {
       newDeliveryRoute.briefcases.push({id: idBriefcase, orderIds: [newOrderIdObj]});
     } else {

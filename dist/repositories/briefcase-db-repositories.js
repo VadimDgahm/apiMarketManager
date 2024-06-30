@@ -108,7 +108,10 @@ exports.briefcaseRepositories = {
             const deliveryRouteIndex = (_a = newDeliveryRoute === null || newDeliveryRoute === void 0 ? void 0 : newDeliveryRoute.briefcases) === null || _a === void 0 ? void 0 : _a.findIndex(briefcase => briefcase.id === idBriefcase);
             const newOrderIdObj = { orderId: orderId, sort: Math.floor(Date.now() / 1000), time: '' };
             if (isFinite(deliveryRouteIndex) && deliveryRouteIndex !== -1) {
-                newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(newOrderIdObj);
+                const isExist = newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.find(item => item.orderId === newOrderIdObj.orderId);
+                if (!isExist) {
+                    newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.push(newOrderIdObj);
+                }
             }
             else if (((_b = newDeliveryRoute.briefcases) === null || _b === void 0 ? void 0 : _b.length) >= 0) {
                 newDeliveryRoute.briefcases.push({ id: idBriefcase, orderIds: [newOrderIdObj] });
