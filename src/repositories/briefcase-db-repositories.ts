@@ -78,6 +78,7 @@ export const briefcaseRepositories = {
   async updateOrderDeliveryRoute(idBriefcase: string, body: OrderDeliveryRouteReqType, orderId: string): Promise<any> {
     const briefcase = await briefcaseCollection.findOne({id: idBriefcase});
     const orderIndex = briefcase.orders.findIndex(order => orderId === order.orderId);
+    let time = '';
 
     // Delete an order in the old delivery route
     if (body.oldDeliveryRouteId) {
@@ -86,8 +87,13 @@ export const briefcaseRepositories = {
       if (OldDeliveryRoute) {
         const OldDeliveryRouteIndex = OldDeliveryRoute.briefcases.findIndex(briefcase => briefcase.id === idBriefcase)
         OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds = OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.filter(
-          oId => oId.orderId !== orderId
-        )
+          oId => {
+            if(oId.orderId !== orderId) {
+              return oId;
+            } else {
+              time = oId.time;
+            }
+          });
 
         if (OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.length === 0) {
           OldDeliveryRoute.briefcases = OldDeliveryRoute.briefcases.filter(briefcase => briefcase.id !== idBriefcase);
@@ -101,7 +107,7 @@ export const briefcaseRepositories = {
     const newDeliveryRoute = await deliveryRoutesCollection.findOne({_id: new ObjectId(body._id)});
     const deliveryRouteIndex = newDeliveryRoute?.briefcases?.findIndex(briefcase => briefcase.id === idBriefcase)
 
-    const newOrderIdObj = {orderId:orderId, sort:Math.floor(Date.now() / 1000), time: ''};
+    const newOrderIdObj = {orderId:orderId, sort:Math.floor(Date.now() / 1000), time: time};
 
     if (isFinite(deliveryRouteIndex) && deliveryRouteIndex !== -1) {
       const isExist = newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.find(

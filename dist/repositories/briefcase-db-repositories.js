@@ -91,12 +91,20 @@ exports.briefcaseRepositories = {
         return __awaiter(this, void 0, void 0, function* () {
             const briefcase = yield db_1.briefcaseCollection.findOne({ id: idBriefcase });
             const orderIndex = briefcase.orders.findIndex(order => orderId === order.orderId);
+            let time = '';
             // Delete an order in the old delivery route
             if (body.oldDeliveryRouteId) {
                 const OldDeliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(body.oldDeliveryRouteId) });
                 if (OldDeliveryRoute) {
                     const OldDeliveryRouteIndex = OldDeliveryRoute.briefcases.findIndex(briefcase => briefcase.id === idBriefcase);
-                    OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds = OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.filter(oId => oId.orderId !== orderId);
+                    OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds = OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.filter(oId => {
+                        if (oId.orderId !== orderId) {
+                            return oId;
+                        }
+                        else {
+                            time = oId.time;
+                        }
+                    });
                     if (OldDeliveryRoute.briefcases[OldDeliveryRouteIndex].orderIds.length === 0) {
                         OldDeliveryRoute.briefcases = OldDeliveryRoute.briefcases.filter(briefcase => briefcase.id !== idBriefcase);
                     }
@@ -106,7 +114,7 @@ exports.briefcaseRepositories = {
             // Add a new order to the delivery route
             const newDeliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(body._id) });
             const deliveryRouteIndex = (_a = newDeliveryRoute === null || newDeliveryRoute === void 0 ? void 0 : newDeliveryRoute.briefcases) === null || _a === void 0 ? void 0 : _a.findIndex(briefcase => briefcase.id === idBriefcase);
-            const newOrderIdObj = { orderId: orderId, sort: Math.floor(Date.now() / 1000), time: '' };
+            const newOrderIdObj = { orderId: orderId, sort: Math.floor(Date.now() / 1000), time: time };
             if (isFinite(deliveryRouteIndex) && deliveryRouteIndex !== -1) {
                 const isExist = newDeliveryRoute.briefcases[deliveryRouteIndex].orderIds.find(item => item.orderId === newOrderIdObj.orderId);
                 if (!isExist) {
