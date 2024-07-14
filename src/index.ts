@@ -14,6 +14,7 @@ import { briefcaseRoute } from "./routes/briefcase-route";
 import { catalogRoute } from "./routes/catalog-route";
 import { addressRoute } from "./routes/address-route";
 import { phoneRoute } from "./routes/phone-route";
+import { invoicesRoute } from "./routes/invoices-route";
 import {deliveryRoutesRoute} from "./routes/deliveryRoutes-route";
 
 
@@ -53,6 +54,8 @@ app.use('/catalog',authMiddleware,isActivationMiddleware, catalogRoute)
 app.use('/phone',authMiddleware, phoneRoute)
 // @ts-ignore
 app.use('/deliveryRoute',authMiddleware, deliveryRoutesRoute)
+// @ts-ignore
+app.use('/invoices',authMiddleware, invoicesRoute)
 app.use(errorMiddleware)
 
 

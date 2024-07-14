@@ -48,5 +48,6 @@ export type DeliveryRouteRequest = {
 }
 
 export type DeliveryRouteResponse = {
+  drTotalAmount?: number;
   orders: BriefcaseOrder[]
 } & deliveryRouteType

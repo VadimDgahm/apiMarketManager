@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.runDb = exports.deliveryRoutesCollection = exports.catalogCollection = exports.briefcaseCollection = exports.refreshTokenCollection = exports.usersCollection = exports.clientCollection = void 0;
+exports.runDb = exports.invoicesCollection = exports.deliveryRoutesCollection = exports.catalogCollection = exports.briefcaseCollection = exports.refreshTokenCollection = exports.usersCollection = exports.clientCollection = void 0;
 const mongodb_1 = require("mongodb");
 const password = process.env.DB_PASSWORD;
 const login = process.env.DB_LOGIN;
@@ -28,6 +28,7 @@ exports.refreshTokenCollection = db.collection('refreshToken');
 exports.briefcaseCollection = db.collection('briefcase');
 exports.catalogCollection = db.collection('catalog');
 exports.deliveryRoutesCollection = db.collection('deliveryRoutes');
+exports.invoicesCollection = db.collection('invoices');
 function runDb() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
