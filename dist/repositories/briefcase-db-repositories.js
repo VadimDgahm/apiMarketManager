@@ -59,6 +59,7 @@ exports.briefcaseRepositories = {
             const res = yield db_1.briefcaseCollection.findOne({ id: idBriefcase });
             if (res) {
                 const order = res.orders.find((o) => o.orderId === orderId);
+                yield db_1.invoicesCollection.deleteOne({ orderId: order.orderId });
                 yield db_1.clientCollection.updateOne({ id: order.clientId }, { $pull: { order: { orderId } } });
                 yield db_1.briefcaseCollection.updateOne({ id: idBriefcase }, { $pull: { orders: { orderId } } });
                 if (order) {

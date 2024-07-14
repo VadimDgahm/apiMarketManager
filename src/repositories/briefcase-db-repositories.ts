@@ -1,4 +1,4 @@
-import {briefcaseCollection, clientCollection, deliveryRoutesCollection} from './db';
+import {briefcaseCollection, clientCollection, deliveryRoutesCollection, invoicesCollection} from './db';
 import {
   BriefcaseOrder,
   BriefcaseType,
@@ -47,6 +47,9 @@ export const briefcaseRepositories = {
         
         if(res){
             const order = res.orders.find((o) => o.orderId === orderId);
+
+            await invoicesCollection.deleteOne({orderId:order.orderId});
+
             await clientCollection.updateOne({id: order.clientId}, {$pull: {order: {orderId}}})
              await briefcaseCollection.updateOne(
                 { id: idBriefcase },

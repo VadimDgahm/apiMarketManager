@@ -28,6 +28,7 @@ const briefcase_route_1 = require("./routes/briefcase-route");
 const catalog_route_1 = require("./routes/catalog-route");
 const address_route_1 = require("./routes/address-route");
 const phone_route_1 = require("./routes/phone-route");
+const invoices_route_1 = require("./routes/invoices-route");
 const deliveryRoutes_route_1 = require("./routes/deliveryRoutes-route");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -58,6 +59,8 @@ app.use('/catalog', auth_middleware_1.authMiddleware, checkActivation_middleware
 app.use('/phone', auth_middleware_1.authMiddleware, phone_route_1.phoneRoute);
 // @ts-ignore
 app.use('/deliveryRoute', auth_middleware_1.authMiddleware, deliveryRoutes_route_1.deliveryRoutesRoute);
+// @ts-ignore
+app.use('/invoices', auth_middleware_1.authMiddleware, invoices_route_1.invoicesRoute);
 app.use(error_middleware_1.default);
 const startApp = () => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, db_1.runDb)();

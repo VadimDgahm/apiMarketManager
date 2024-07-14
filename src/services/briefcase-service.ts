@@ -4,6 +4,7 @@ import {v4 as uuidv4, v4} from 'uuid';
 import { getCurrentDate } from '../utils/utils';
 import { briefcaseRepositories } from '../repositories/briefcase-db-repositories';
 import { clientCollection } from '../repositories/db';
+import {OrderItemsResponse} from "./invoices-service";
 
 export const briefcaseService = {
     async getBriefcase(userId: string) {
@@ -93,6 +94,7 @@ export type BriefcaseType = {
 type RequestCreateBriefcase = Omit<Omit<BriefcaseType, 'id'>, 'createdDate' >
 
 export type OrderType = {
+    productId: string;
     comments: string;
     name: string;
     positionId: string;
@@ -120,7 +122,7 @@ export type OrderClientType = {
 };
 
 export type BriefcaseOrder = {
-  clientName: string
+  clientName: string,
   orderId: string,
   clientId: string,
   address: string,
@@ -132,7 +134,12 @@ export type BriefcaseOrder = {
   deliveryRoute: OrderDeliveryRouteType | null,
   dataClient?: object,
   sort?: number,
-  briefcaseId? : string
-  time?: string
+  briefcaseId? : string,
+  time?: string,
+  invoiceOrderItems?: OrderItemsResponse[],
+  totalAmount?: number;
+  discount?: number;
+  priceDelivery?: number;
+  finalTotalAmount?: number;
 }
   

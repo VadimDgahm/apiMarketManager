@@ -8,14 +8,15 @@ export const catalogService = {
     async getCatalog() {
         return await catalogRepositories.getCatalog()
     },
-    async createProduct({name, type, userId, view,reductionName}:ProductTypeRequest) {
+    async createProduct({name, type, userId, view,reductionName, price}:ProductTypeRequest) {
         const body: ProductType = {
             id: uuidv4(),
             name,
             type,
             view,
             userId,
-            reductionName
+            reductionName,
+            price
         }
         return await catalogRepositories.createProduct(body)
     },
@@ -34,6 +35,7 @@ export type ProductTypeRequest = {
     userId:string
     view: "Свинина" | "Птица" | "Говядина"
     reductionName: string
+    price: number
 }
 
 export type ProductType = {
