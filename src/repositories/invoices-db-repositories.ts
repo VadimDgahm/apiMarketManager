@@ -5,10 +5,10 @@ import {
   deliveryRoutesCollection,
   invoicesCollection
 } from './db';
-import {DeliveryRouteRequest, DeliveryRouteResponse, deliveryRouteType} from "../services/delivery-routes-service";
+import { DeliveryRouteResponse } from "../services/delivery-routes-service";
 import {ObjectId} from "mongodb";
 import {BriefcaseOrder} from "../services/briefcase-service";
-import {InvoiceType, invoicesService, OrderItemsResponse} from "../services/invoices-service";
+import {InvoiceType, OrderItemsResponse} from "../services/invoices-service";
 
 export const invoicesRepositories = {
   async getInvoicesById(id: string) {
@@ -53,17 +53,21 @@ export const invoicesRepositories = {
             const invoiceOrderItems: OrderItemsResponse[] = [];
             let totalAmount = 0;
 
-            for (const item of invoice.orderItems) {
-              const product = await catalogCollection.findOne({_id: new ObjectId(item.productId)});
+            for (const invoiceOrderItem of invoice.orderItems) {
+              const product = await catalogCollection.findOne({_id: new ObjectId(invoiceOrderItem.productId)});
+              const comments = order.orderClient.find(
+                (orderItem) => orderItem.positionId === invoiceOrderItem.positionId
+              )?.comments;
 
-              const amount = +(product.price * item.weight).toFixed(2);
+              const amount = +(product.price * invoiceOrderItem.weight).toFixed(2);
               totalAmount += amount;
 
               invoiceOrderItems.push({
-                ...item,
+                ...invoiceOrderItem,
                 productPrice: product.price,
                 name: product.name,
-                amount: amount
+                amount: amount,
+                comments: comments
               });
             }
 
@@ -73,7 +77,7 @@ export const invoicesRepositories = {
             order.discount = invoice.discount;
             order.priceDelivery = invoice.priceDelivery;
 
-            result.drTotalAmount += order.finalTotalAmount;
+            result.drTotalAmount += +order.finalTotalAmount.toFixed(2);
           }
 
         }
@@ -90,6 +94,7 @@ export const invoicesRepositories = {
 
     return result
   },
+
   async createInvoice(body:InvoiceType) {
     const query = { orderId: body.orderId };
     const update = { $set: body};
@@ -97,6 +102,7 @@ export const invoicesRepositories = {
 
     return await invoicesCollection.updateOne(query, update, options);
   },
+
   async getOrderInvoiceById(briefcaseId: string, orderId:string) {
     const res = await briefcaseCollection.findOne({id: briefcaseId})
 
