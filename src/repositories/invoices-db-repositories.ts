@@ -5,10 +5,10 @@ import {
   deliveryRoutesCollection,
   invoicesCollection
 } from './db';
-import {DeliveryRouteRequest, DeliveryRouteResponse, deliveryRouteType} from "../services/delivery-routes-service";
+import { DeliveryRouteResponse } from "../services/delivery-routes-service";
 import {ObjectId} from "mongodb";
 import {BriefcaseOrder} from "../services/briefcase-service";
-import {InvoiceType, invoicesService, OrderItemsResponse} from "../services/invoices-service";
+import {InvoiceType, OrderItemsResponse} from "../services/invoices-service";
 
 export const invoicesRepositories = {
   async getInvoicesById(id: string) {
