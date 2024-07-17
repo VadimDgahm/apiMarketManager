@@ -23,7 +23,13 @@ export const briefcaseRepositories = {
         }
     },
     async getBriefcaseById(briefcaseId: string, userId: string) {
+        const start= new Date().getTime();
+
         const briefcase = await briefcaseCollection.findOne({id:briefcaseId, userId})
+
+        const end = new Date().getTime();
+        briefcase.tt = end - start;
+
         briefcase.orders.reverse()
         return briefcase
     },

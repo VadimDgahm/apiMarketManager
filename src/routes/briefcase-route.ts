@@ -12,13 +12,9 @@ briefcaseRoute.get('/', async (req: AuthenticatedRequest, res: Response) => {
 
 // @ts-ignore
 briefcaseRoute.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
-    const start= new Date().getTime();
     const briefcase = await briefcaseService.getBriefcaseById(req.params.id , req.user.id)
 
     if (briefcase) {
-        const end = new Date().getTime();
-        console.log(`SecondWay: ${end - start}ms`);
-        briefcase.tt = end - start;
         res.send(briefcase)
     } else {
         res.status(404).send('not Found')

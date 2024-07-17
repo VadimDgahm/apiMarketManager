@@ -26,7 +26,10 @@ exports.briefcaseRepositories = {
     },
     getBriefcaseById(briefcaseId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
+            const start = new Date().getTime();
             const briefcase = yield db_1.briefcaseCollection.findOne({ id: briefcaseId, userId });
+            const end = new Date().getTime();
+            briefcase.tt = end - start;
             briefcase.orders.reverse();
             return briefcase;
         });
