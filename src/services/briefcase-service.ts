@@ -90,6 +90,7 @@ export type BriefcaseType = {
     createdDate: string
     orders: BriefcaseOrder[]
     userId: string
+    tt?: number
 }
 type RequestCreateBriefcase = Omit<Omit<BriefcaseType, 'id'>, 'createdDate' >
 

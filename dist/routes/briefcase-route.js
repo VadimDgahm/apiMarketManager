@@ -20,8 +20,12 @@ exports.briefcaseRoute.get('/', (req, res) => __awaiter(void 0, void 0, void 0, 
 }));
 // @ts-ignore
 exports.briefcaseRoute.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const start = new Date().getTime();
     const briefcase = yield briefcase_service_1.briefcaseService.getBriefcaseById(req.params.id, req.user.id);
     if (briefcase) {
+        const end = new Date().getTime();
+        console.log(`SecondWay: ${end - start}ms`);
+        briefcase.tt = end - start;
         res.send(briefcase);
     }
     else {
