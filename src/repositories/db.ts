@@ -5,11 +5,12 @@ import {UserRefreshToken} from '../services/token-service';
 import { BriefcaseType } from "../services/briefcase-service";
 import { ProductType } from "../services/catalog-service";
 import {deliveryRouteType} from "../services/delivery-routes-service";
-import {InvoiceType} from "../services/invoices-service";
+import {InvoiceTypeRes} from "../services/invoices-service";
 
 const password = process.env.DB_PASSWORD
 const login = process.env.DB_LOGIN
-const mongoUri = `mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0` || "mongodb://0.0.0.0:27037"
+ const mongoUri = `mongodb+srv://Pass123:Pass123@cluster0.hvknfqy.mongodb.net/meatMarket?retryWrites=true&w=majority&appName=Cluster0` || "mongodb://0.0.0.0:27037"
+//const mongoUri = "mongodb://0.0.0.0:27017"
 
 const client = new MongoClient(mongoUri, {
     serverApi: {
@@ -26,7 +27,7 @@ export const refreshTokenCollection = db.collection<UserRefreshToken>('refreshTo
 export const briefcaseCollection = db.collection<BriefcaseType>('briefcase')
 export const catalogCollection = db.collection<ProductType>('catalog')
 export const deliveryRoutesCollection = db.collection<deliveryRouteType>('deliveryRoutes')
-export const invoicesCollection = db.collection<InvoiceType>('invoices')
+export const invoicesCollection = db.collection<InvoiceTypeRes>('invoices')
 
 
 

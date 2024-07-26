@@ -14,10 +14,10 @@ const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
 exports.invoicesRepositories = {
     getInvoicesById(id) {
-        var _a, _b;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const deliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(id) });
-            const result = Object.assign(Object.assign({}, deliveryRoute), { drTotalAmount: 0, orders: [] });
+            const result = Object.assign(Object.assign({}, deliveryRoute), { orders: [], drTotalAmount: 0 });
             if ((deliveryRoute === null || deliveryRoute === void 0 ? void 0 : deliveryRoute.briefcases) && ((_a = deliveryRoute === null || deliveryRoute === void 0 ? void 0 : deliveryRoute.briefcases) === null || _a === void 0 ? void 0 : _a.length) >= 0) {
                 for (const deliveryRouteBriefcase of deliveryRoute.briefcases) {
                     const briefcase = yield db_1.briefcaseCollection.findOne({ id: deliveryRouteBriefcase.id });
@@ -32,7 +32,6 @@ exports.invoicesRepositories = {
                             }
                         }));
                     }
-                    // const orders = briefcase.orders.filter(order => deliveryRouteBriefcase.orderIds.includes(order.orderId));
                     for (const order of orders) {
                         const client = yield db_1.clientCollection.findOne({ id: order.clientId });
                         order.dataClient = {
@@ -44,21 +43,12 @@ exports.invoicesRepositories = {
                         };
                         const invoice = yield db_1.invoicesCollection.findOne({ orderId: order.orderId });
                         if (invoice) {
-                            const invoiceOrderItems = [];
-                            let totalAmount = 0;
-                            for (const invoiceOrderItem of invoice.orderItems) {
-                                const product = yield db_1.catalogCollection.findOne({ _id: new mongodb_1.ObjectId(invoiceOrderItem.productId) });
-                                const comments = (_b = order.orderClient.find((orderItem) => orderItem.positionId === invoiceOrderItem.positionId)) === null || _b === void 0 ? void 0 : _b.comments;
-                                const amount = +(product.price * invoiceOrderItem.weight).toFixed(2);
-                                totalAmount += amount;
-                                invoiceOrderItems.push(Object.assign(Object.assign({}, invoiceOrderItem), { productPrice: product.price, name: product.name, amount: amount, comments: comments }));
-                            }
-                            order.invoiceOrderItems = invoiceOrderItems;
-                            order.totalAmount = +totalAmount.toFixed(2) + invoice.priceDelivery;
-                            order.finalTotalAmount = +(order.totalAmount * (1 - invoice.discount / 100)).toFixed(2);
+                            order.invoiceOrderItems = invoice.orderItems;
+                            order.totalAmount = invoice.totalAmount;
+                            order.finalTotalAmount = invoice.finalTotalAmount;
                             order.discount = invoice.discount;
                             order.priceDelivery = invoice.priceDelivery;
-                            result.drTotalAmount += +order.finalTotalAmount.toFixed(2);
+                            result.drTotalAmount += order.finalTotalAmount;
                         }
                     }
                     result.orders.push(...orders);
@@ -86,22 +76,19 @@ exports.invoicesRepositories = {
                 const order = res.orders.find((o) => o.orderId === orderId);
                 const invoice = yield db_1.invoicesCollection.findOne({ orderId: order.orderId });
                 if (invoice) {
-                    const invoiceOrderItems = [];
-                    let totalAmount = 0;
-                    for (const item of invoice.orderItems) {
-                        const product = yield db_1.catalogCollection.findOne({ _id: new mongodb_1.ObjectId(item.productId) });
-                        const amount = +(product.price * item.weight).toFixed(2);
-                        totalAmount += amount;
-                        invoiceOrderItems.push(Object.assign(Object.assign({}, item), { productPrice: product.price, name: product.name, amount: amount, units: item.units }));
-                    }
-                    order.invoiceOrderItems = invoiceOrderItems;
-                    order.totalAmount = +totalAmount.toFixed(2) + invoice.priceDelivery;
-                    order.finalTotalAmount = +(order.totalAmount * (1 - invoice.discount / 100)).toFixed(2);
+                    order.invoiceOrderItems = invoice.orderItems;
+                    order.totalAmount = invoice.totalAmount;
+                    order.finalTotalAmount = invoice.finalTotalAmount;
                     order.discount = invoice.discount;
                     order.priceDelivery = invoice.priceDelivery;
                 }
                 return order;
             }
+        });
+    },
+    getDR(drId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(drId) });
         });
     }
 };
