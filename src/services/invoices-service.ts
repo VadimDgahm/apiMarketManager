@@ -27,7 +27,8 @@ export const invoicesService = {
         productPrice: product.price,
         name: product.name,
         amount: amount,
-        units: item.units
+        units: item.units,
+        comments: item.comments
       });
 
     }
