@@ -18,8 +18,12 @@ export const invoicesService = {
 
     for (const item of body.orderItems) {
       const product = await catalogCollection.findOne({_id: new ObjectId(item.productId)});
+      let amount = 0;
 
-      const amount = +(product.price * item.weight).toFixed(2);
+      if (!item.isGift) {
+        amount = +(product.price * item.weight).toFixed(2);
+      }
+
       totalAmount += amount;
 
       invoiceOrderItems.push({
@@ -57,6 +61,7 @@ export type OrderItemsRequest = {
   comments: string;
   weight: number;
   units: string;
+  isGift: boolean;
 }
 
 export type OrderItemsResponse = {
@@ -73,10 +78,12 @@ export type InvoiceType = {
   orderItems: OrderItemsResponse[];
   discount: number;
   priceDelivery: number;
+  markOrder: boolean
 }
 
 export type InvoiceTypeRes = {
   totalAmount: number,
   finalTotalAmount: number,
   orderItems: OrderItemsResponse[],
+  markOrder: boolean
 } & InvoiceType

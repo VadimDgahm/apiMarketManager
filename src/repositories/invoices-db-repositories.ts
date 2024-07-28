@@ -48,6 +48,7 @@ export const invoicesRepositories = {
           const invoice = await invoicesCollection.findOne({orderId:order.orderId});
 
           if(invoice) {
+            order.markOrder = invoice.markOrder;
             order.invoiceOrderItems = invoice.orderItems;
 
             order.totalAmount = invoice.totalAmount;
