@@ -102,6 +102,7 @@ export type OrderType = {
     price: string;
     quantity: string;
     reductionName: string;
+    isGift: boolean;
   };
 export type OrderDeliveryRouteType = {
    _id: string;
@@ -142,5 +143,6 @@ export type BriefcaseOrder = {
   discount?: number;
   priceDelivery?: number;
   finalTotalAmount?: number;
+  markOrder?: boolean;
 }
   

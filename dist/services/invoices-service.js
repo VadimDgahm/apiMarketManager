@@ -30,7 +30,10 @@ exports.invoicesService = {
             let totalAmount = 0;
             for (const item of body.orderItems) {
                 const product = yield db_1.catalogCollection.findOne({ _id: new mongodb_1.ObjectId(item.productId) });
-                const amount = +(product.price * item.weight).toFixed(2);
+                let amount = 0;
+                if (!item.isGift) {
+                    amount = +(product.price * item.weight).toFixed(2);
+                }
                 totalAmount += amount;
                 invoiceOrderItems.push(Object.assign(Object.assign({}, item), { productPrice: product.price, name: product.name, amount: amount, units: item.units, comments: item.comments }));
             }
