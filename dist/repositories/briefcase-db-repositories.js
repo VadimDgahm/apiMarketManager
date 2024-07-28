@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.briefcaseRepositories = void 0;
 const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
+const invoices_service_1 = require("../services/invoices-service");
 exports.briefcaseRepositories = {
     getBriefcase(userId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -47,6 +48,9 @@ exports.briefcaseRepositories = {
     removeBriefcase(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const res = yield db_1.briefcaseCollection.deleteOne({ id });
+            if (res.deletedCount) {
+                yield invoices_service_1.invoicesService.deleteInvoicesByBriefcaseId(id);
+            }
         });
     },
     getPurchases(id) {

@@ -6,9 +6,9 @@ import {
   invoicesCollection
 } from './db';
 import {DeliveryRouteResponse} from "../services/delivery-routes-service";
-import {ObjectId} from "mongodb";
+import {Filter, ObjectId} from "mongodb";
 import {BriefcaseOrder} from "../services/briefcase-service";
-import {InvoiceType} from "../services/invoices-service";
+import {InvoiceType, InvoiceTypeRes} from "../services/invoices-service";
 
 export const invoicesRepositories = {
   async getInvoicesById(id: string) {
@@ -101,5 +101,9 @@ export const invoicesRepositories = {
 
   async getDR(drId: string) {
     return await deliveryRoutesCollection.findOne({_id: new ObjectId(drId)});
+  },
+
+  async deleteManyInvoices(query: Filter<InvoiceTypeRes>) {
+    return await invoicesCollection.deleteMany(query);
   }
 }
