@@ -11,8 +11,8 @@ import {BriefcaseOrder} from "../services/briefcase-service";
 import {InvoiceType, InvoiceTypeRes} from "../services/invoices-service";
 
 export const invoicesRepositories = {
-  async getInvoicesById(id: string) {
-    const deliveryRoute = await deliveryRoutesCollection.findOne({_id: new ObjectId(id)})
+  async getInvoicesById(id: string, userId: string) {
+    const deliveryRoute = await deliveryRoutesCollection.findOne({_id: new ObjectId(id), userId});
     const result: DeliveryRouteResponse = {
       ...deliveryRoute,
       orders: [],
@@ -81,8 +81,8 @@ export const invoicesRepositories = {
     return await invoicesCollection.updateOne(query, update, options);
   },
 
-  async getOrderInvoiceById(briefcaseId: string, orderId:string) {
-    const res = await briefcaseCollection.findOne({id: briefcaseId})
+  async getOrderInvoiceById(briefcaseId: string, orderId: string, userId: string) {
+    const res = await briefcaseCollection.findOne({id: briefcaseId, userId});
 
     if(res) {
       const order = res.orders.find((o) => o.orderId === orderId);
@@ -94,6 +94,7 @@ export const invoicesRepositories = {
         order.finalTotalAmount = invoice.finalTotalAmount;
         order.discount = invoice.discount;
         order.priceDelivery = invoice.priceDelivery;
+        order.userId = userId;
       }
 
       return order;

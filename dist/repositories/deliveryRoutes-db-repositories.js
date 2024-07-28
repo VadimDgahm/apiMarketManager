@@ -13,15 +13,15 @@ exports.deliveryRoutesRepositories = void 0;
 const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
 exports.deliveryRoutesRepositories = {
-    getDeliveryRoutes() {
+    getDeliveryRoutes(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield db_1.deliveryRoutesCollection.find().toArray();
+            return yield db_1.deliveryRoutesCollection.find({ userId }).toArray();
         });
     },
-    getDeliveryRoutesById(id) {
+    getDeliveryRoutesById(id, userId) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const deliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(id) });
+            const deliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(id), userId });
             const result = Object.assign(Object.assign({}, deliveryRoute), { orders: [] });
             if ((deliveryRoute === null || deliveryRoute === void 0 ? void 0 : deliveryRoute.briefcases) && ((_a = deliveryRoute === null || deliveryRoute === void 0 ? void 0 : deliveryRoute.briefcases) === null || _a === void 0 ? void 0 : _a.length) >= 0) {
                 for (const deliveryRouteBriefcase of deliveryRoute.briefcases) {
@@ -63,19 +63,19 @@ exports.deliveryRoutesRepositories = {
             return yield db_1.deliveryRoutesCollection.insertOne(body);
         });
     },
-    removeDeliveryRoutes(id) {
+    removeDeliveryRoutes(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield db_1.deliveryRoutesCollection.deleteOne({ _id: new mongodb_1.ObjectId(id) });
+            return yield db_1.deliveryRoutesCollection.deleteOne({ _id: new mongodb_1.ObjectId(id), userId });
         });
     },
-    updateDeliveryRoute(id, body) {
+    updateDeliveryRoute(id, body, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield db_1.deliveryRoutesCollection.findOneAndUpdate({ _id: new mongodb_1.ObjectId(body._id) }, { $set: { name: body.name } });
+            return yield db_1.deliveryRoutesCollection.findOneAndUpdate({ _id: new mongodb_1.ObjectId(body._id), userId }, { $set: { name: body.name } });
         });
     },
-    sortDeliveryRoute(body) {
+    sortDeliveryRoute(body, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield db_1.deliveryRoutesCollection.findOneAndUpdate({ _id: new mongodb_1.ObjectId(body._id) }, { $set: { briefcases: body.briefcases } });
+            return yield db_1.deliveryRoutesCollection.findOneAndUpdate({ _id: new mongodb_1.ObjectId(body._id), userId }, { $set: { briefcases: body.briefcases } });
         });
     }
 };

@@ -4,11 +4,11 @@ import {ObjectId} from "mongodb";
 import {BriefcaseOrder} from "../services/briefcase-service";
 
 export const deliveryRoutesRepositories = {
-  async getDeliveryRoutes() {
-    return await deliveryRoutesCollection.find().toArray()
+  async getDeliveryRoutes(userId: string) {
+    return await deliveryRoutesCollection.find({userId}).toArray();
   },
-  async getDeliveryRoutesById(id: string) {
-    const deliveryRoute = await deliveryRoutesCollection.findOne({_id: new ObjectId(id)})
+  async getDeliveryRoutesById(id: string, userId: string) {
+    const deliveryRoute = await deliveryRoutesCollection.findOne({_id: new ObjectId(id), userId})
     const result: DeliveryRouteResponse = {
       ...deliveryRoute,
       orders: []
@@ -58,13 +58,13 @@ export const deliveryRoutesRepositories = {
   async createDeliveryRoute(body: deliveryRouteType) {
     return await deliveryRoutesCollection.insertOne(body)
   },
-  async removeDeliveryRoutes(id: string) {
-    return await deliveryRoutesCollection.deleteOne({_id: new ObjectId(id)})
+  async removeDeliveryRoutes(id: string, userId: string) {
+    return await deliveryRoutesCollection.deleteOne({_id: new ObjectId(id), userId});
   },
-  async updateDeliveryRoute(id: string, body: DeliveryRouteRequest) {
-    return await deliveryRoutesCollection.findOneAndUpdate({_id: new ObjectId(body._id)}, {$set: {name: body.name}})
+  async updateDeliveryRoute(id: string, body: DeliveryRouteRequest, userId: string) {
+    return await deliveryRoutesCollection.findOneAndUpdate({_id: new ObjectId(body._id), userId}, {$set: {name: body.name}})
   },
-  async sortDeliveryRoute(body: deliveryRouteType) {
-    return await deliveryRoutesCollection.findOneAndUpdate({_id: new ObjectId(body._id)}, {$set: {briefcases: body.briefcases}})
+  async sortDeliveryRoute(body: deliveryRouteType, userId: string) {
+    return await deliveryRoutesCollection.findOneAndUpdate({_id: new ObjectId(body._id), userId}, {$set: {briefcases: body.briefcases}})
   }
 }
