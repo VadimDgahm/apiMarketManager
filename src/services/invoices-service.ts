@@ -3,15 +3,15 @@ import {catalogCollection} from "../repositories/db";
 import {ObjectId} from "mongodb";
 
 export const invoicesService = {
-  async getInvoicesById(id: string) {
-    return await invoicesRepositories.getInvoicesById(id);
+  async getInvoicesById(id: string, userId: string) {
+    return await invoicesRepositories.getInvoicesById(id, userId);
   },
 
-  async getOrderInvoiceById(briefcaseId: string, orderId: string) {
-    return await invoicesRepositories.getOrderInvoiceById(briefcaseId, orderId);
+  async getOrderInvoiceById(briefcaseId: string, orderId: string, userId: string) {
+    return await invoicesRepositories.getOrderInvoiceById(briefcaseId, orderId, userId);
   },
 
-  async createInvoice(body: InvoiceType) {
+  async createInvoice(body: InvoiceType, userId: string) {
     const invoiceOrderItems: OrderItemsResponse[] = [];
     let totalAmount = 0;
 
@@ -45,6 +45,7 @@ export const invoicesService = {
       orderItems: invoiceOrderItems,
       totalAmount,
       finalTotalAmount,
+      userId
     }
 
     return await invoicesRepositories.createInvoice(invoice);
@@ -82,6 +83,7 @@ export type InvoiceType = {
 }
 
 export type InvoiceTypeRes = {
+  userId: string,
   totalAmount: number,
   finalTotalAmount: number,
   orderItems: OrderItemsResponse[],

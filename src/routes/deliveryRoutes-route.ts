@@ -6,8 +6,9 @@ export const deliveryRoutesRoute = Router({})
 
 deliveryRoutesRoute.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const deliveryRoute = await deliveryRoutesService.getDeliveryRoutes()
-    res.send(deliveryRoute)
+    const userId = req.user.id;
+    const deliveryRoute = await deliveryRoutesService.getDeliveryRoutes(userId);
+    res.send(deliveryRoute);
   } catch (e) {
     next(e)
   }
@@ -15,7 +16,8 @@ deliveryRoutesRoute.get('/', async (req: AuthenticatedRequest, res: Response, ne
 
 deliveryRoutesRoute.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const deliveryRoute = await deliveryRoutesService.getDeliveryRoutesById(req.params.id)
+    const userId = req.user.id;
+    const deliveryRoute = await deliveryRoutesService.getDeliveryRoutesById(req.params.id, userId);
     res.send(deliveryRoute)
   } catch (e) {
     next(e)
@@ -25,7 +27,8 @@ deliveryRoutesRoute.get('/:id', async (req: AuthenticatedRequest, res: Response,
 deliveryRoutesRoute.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const body = req.body
-    const deliveryRoute = await deliveryRoutesService.createDeliveryRoute(body)
+    const userId = req.user.id;
+    const deliveryRoute = await deliveryRoutesService.createDeliveryRoute(body, userId);
     res.send(deliveryRoute)
   } catch (e) {
     next(e)
@@ -34,8 +37,9 @@ deliveryRoutesRoute.post('/', async (req: AuthenticatedRequest, res: Response, n
 
 deliveryRoutesRoute.delete('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id
-    const deliveryRoute = await deliveryRoutesService.removeDeliveryRoute(id)
+    const id = req.params.id;
+    const userId = req.user.id;
+    const deliveryRoute = await deliveryRoutesService.removeDeliveryRoute(id, userId);
 
     res.send(deliveryRoute)
   } catch (e) {
@@ -47,7 +51,8 @@ deliveryRoutesRoute.put('/:id', async (req: AuthenticatedRequest, res: Response,
   try {
     const deliveryRouteId = req.params.id
     const body = req.body
-    const deliveryRoute = await deliveryRoutesService.updateDeliveryRoute(deliveryRouteId, body)
+    const userId = req.user.id;
+    const deliveryRoute = await deliveryRoutesService.updateDeliveryRoute(deliveryRouteId, body, userId);
     res.send(deliveryRoute)
   } catch (e) {
     next(e)
@@ -56,8 +61,9 @@ deliveryRoutesRoute.put('/:id', async (req: AuthenticatedRequest, res: Response,
 
 deliveryRoutesRoute.put('/sort/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const body = req.body
-    const deliveryRoute = await deliveryRoutesService.sortDeliveryRoute(body)
+    const body = req.body;
+    const userId = req.user.id;
+    const deliveryRoute = await deliveryRoutesService.sortDeliveryRoute(body, userId);
     res.send(deliveryRoute)
   } catch (e) {
     next(e)

@@ -6,7 +6,8 @@ export const invoicesRoute = Router({})
 
 invoicesRoute.get('/:id', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const invoice = await invoicesService.getInvoicesById(req.params.id);
+    const userId = req.user.id;
+    const invoice = await invoicesService.getInvoicesById(req.params.id, userId);
     res.send(invoice);
   } catch (e) {
     next(e)
@@ -15,7 +16,8 @@ invoicesRoute.get('/:id', async (req: AuthenticatedRequest, res: Response, next:
 
 invoicesRoute.get('/receipt/:briefcase/:order', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const orderInvoice = await invoicesService.getOrderInvoiceById(req.params.briefcase,req.params.order);
+    const userId = req.user.id;
+    const orderInvoice = await invoicesService.getOrderInvoiceById(req.params.briefcase,req.params.order, userId);
     res.send(orderInvoice);
   } catch (e) {
     next(e)
@@ -24,7 +26,8 @@ invoicesRoute.get('/receipt/:briefcase/:order', async (req: AuthenticatedRequest
 
 invoicesRoute.post('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const createInvoice = await invoicesService.createInvoice(req.body);
+    const userId = req.user.id;
+    const createInvoice = await invoicesService.createInvoice(req.body, userId);
     res.send(createInvoice);
   } catch (e) {
     next(e)

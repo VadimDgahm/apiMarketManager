@@ -13,19 +13,20 @@ exports.deliveryRoutesService = void 0;
 const deliveryRoutes_db_repositories_1 = require("../repositories/deliveryRoutes-db-repositories");
 const utils_1 = require("../utils/utils");
 exports.deliveryRoutesService = {
-    getDeliveryRoutes() {
+    getDeliveryRoutes(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.getDeliveryRoutes();
+            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.getDeliveryRoutes(userId);
         });
     },
-    getDeliveryRoutesById(id) {
+    getDeliveryRoutesById(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.getDeliveryRoutesById(id);
+            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.getDeliveryRoutesById(id, userId);
         });
     },
-    createDeliveryRoute({ name }) {
+    createDeliveryRoute({ name }, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const body = {
+                userId,
                 name,
                 createdDate: (0, utils_1.getCurrentDate)(),
                 briefcases: [],
@@ -33,19 +34,19 @@ exports.deliveryRoutesService = {
             return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.createDeliveryRoute(body);
         });
     },
-    removeDeliveryRoute(id) {
+    removeDeliveryRoute(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.removeDeliveryRoutes(id);
+            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.removeDeliveryRoutes(id, userId);
         });
     },
-    updateDeliveryRoute(deliveryRouteId, body) {
+    updateDeliveryRoute(deliveryRouteId, body, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.updateDeliveryRoute(deliveryRouteId, body);
+            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.updateDeliveryRoute(deliveryRouteId, body, userId);
         });
     },
-    sortDeliveryRoute(body) {
+    sortDeliveryRoute(body, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.sortDeliveryRoute(body);
+            return yield deliveryRoutes_db_repositories_1.deliveryRoutesRepositories.sortDeliveryRoute(body, userId);
         });
     }
 };

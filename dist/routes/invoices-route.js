@@ -15,7 +15,8 @@ const invoices_service_1 = require("../services/invoices-service");
 exports.invoicesRoute = (0, express_1.Router)({});
 exports.invoicesRoute.get('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const invoice = yield invoices_service_1.invoicesService.getInvoicesById(req.params.id);
+        const userId = req.user.id;
+        const invoice = yield invoices_service_1.invoicesService.getInvoicesById(req.params.id, userId);
         res.send(invoice);
     }
     catch (e) {
@@ -24,7 +25,8 @@ exports.invoicesRoute.get('/:id', (req, res, next) => __awaiter(void 0, void 0, 
 }));
 exports.invoicesRoute.get('/receipt/:briefcase/:order', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const orderInvoice = yield invoices_service_1.invoicesService.getOrderInvoiceById(req.params.briefcase, req.params.order);
+        const userId = req.user.id;
+        const orderInvoice = yield invoices_service_1.invoicesService.getOrderInvoiceById(req.params.briefcase, req.params.order, userId);
         res.send(orderInvoice);
     }
     catch (e) {
@@ -33,7 +35,8 @@ exports.invoicesRoute.get('/receipt/:briefcase/:order', (req, res, next) => __aw
 }));
 exports.invoicesRoute.post('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const createInvoice = yield invoices_service_1.invoicesService.createInvoice(req.body);
+        const userId = req.user.id;
+        const createInvoice = yield invoices_service_1.invoicesService.createInvoice(req.body, userId);
         res.send(createInvoice);
     }
     catch (e) {

@@ -4,14 +4,15 @@ import {ObjectId} from "mongodb";
 import {BriefcaseOrder} from "./briefcase-service";
 
 export const deliveryRoutesService = {
-  async getDeliveryRoutes() {
-    return await deliveryRoutesRepositories.getDeliveryRoutes()
+  async getDeliveryRoutes(userId: string) {
+    return await deliveryRoutesRepositories.getDeliveryRoutes(userId);
   },
-  async getDeliveryRoutesById(id: string) {
-    return await deliveryRoutesRepositories.getDeliveryRoutesById(id)
+  async getDeliveryRoutesById(id: string, userId: string) {
+    return await deliveryRoutesRepositories.getDeliveryRoutesById(id, userId);
   },
-  async createDeliveryRoute({name}: DeliveryRouteRequest) {
+  async createDeliveryRoute({name}: DeliveryRouteRequest, userId: string) {
     const body: deliveryRouteType = {
+      userId,
       name,
       createdDate: getCurrentDate(),
       briefcases: [],
@@ -19,19 +20,20 @@ export const deliveryRoutesService = {
 
     return await deliveryRoutesRepositories.createDeliveryRoute(body)
   },
-  async removeDeliveryRoute(id: string) {
-    return await deliveryRoutesRepositories.removeDeliveryRoutes(id)
+  async removeDeliveryRoute(id: string, userId: string) {
+    return await deliveryRoutesRepositories.removeDeliveryRoutes(id, userId);
   },
-  async updateDeliveryRoute(deliveryRouteId: string, body: DeliveryRouteRequest) {
-    return await deliveryRoutesRepositories.updateDeliveryRoute(deliveryRouteId, body)
+  async updateDeliveryRoute(deliveryRouteId: string, body: DeliveryRouteRequest, userId: string) {
+    return await deliveryRoutesRepositories.updateDeliveryRoute(deliveryRouteId, body, userId);
   },
-  async sortDeliveryRoute(body: deliveryRouteType) {
-    return await deliveryRoutesRepositories.sortDeliveryRoute(body)
+  async sortDeliveryRoute(body: deliveryRouteType, userId:string) {
+    return await deliveryRoutesRepositories.sortDeliveryRoute(body, userId);
   }
 }
 
 export type deliveryRouteType = {
   _id?: ObjectId,
+  userId: string,
   name: string,
   createdDate: string,
   briefcases: BriefcasesDeliveryRouteType[],

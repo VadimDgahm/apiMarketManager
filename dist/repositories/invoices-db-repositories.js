@@ -13,10 +13,10 @@ exports.invoicesRepositories = void 0;
 const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
 exports.invoicesRepositories = {
-    getInvoicesById(id) {
+    getInvoicesById(id, userId) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const deliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(id) });
+            const deliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(id), userId });
             const result = Object.assign(Object.assign({}, deliveryRoute), { orders: [], drTotalAmount: 0 });
             if ((deliveryRoute === null || deliveryRoute === void 0 ? void 0 : deliveryRoute.briefcases) && ((_a = deliveryRoute === null || deliveryRoute === void 0 ? void 0 : deliveryRoute.briefcases) === null || _a === void 0 ? void 0 : _a.length) >= 0) {
                 for (const deliveryRouteBriefcase of deliveryRoute.briefcases) {
@@ -70,9 +70,9 @@ exports.invoicesRepositories = {
             return yield db_1.invoicesCollection.updateOne(query, update, options);
         });
     },
-    getOrderInvoiceById(briefcaseId, orderId) {
+    getOrderInvoiceById(briefcaseId, orderId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const res = yield db_1.briefcaseCollection.findOne({ id: briefcaseId });
+            const res = yield db_1.briefcaseCollection.findOne({ id: briefcaseId, userId });
             if (res) {
                 const order = res.orders.find((o) => o.orderId === orderId);
                 const invoice = yield db_1.invoicesCollection.findOne({ orderId: order.orderId });
@@ -82,6 +82,7 @@ exports.invoicesRepositories = {
                     order.finalTotalAmount = invoice.finalTotalAmount;
                     order.discount = invoice.discount;
                     order.priceDelivery = invoice.priceDelivery;
+                    order.userId = userId;
                 }
                 return order;
             }

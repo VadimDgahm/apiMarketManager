@@ -14,17 +14,17 @@ const invoices_db_repositories_1 = require("../repositories/invoices-db-reposito
 const db_1 = require("../repositories/db");
 const mongodb_1 = require("mongodb");
 exports.invoicesService = {
-    getInvoicesById(id) {
+    getInvoicesById(id, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield invoices_db_repositories_1.invoicesRepositories.getInvoicesById(id);
+            return yield invoices_db_repositories_1.invoicesRepositories.getInvoicesById(id, userId);
         });
     },
-    getOrderInvoiceById(briefcaseId, orderId) {
+    getOrderInvoiceById(briefcaseId, orderId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield invoices_db_repositories_1.invoicesRepositories.getOrderInvoiceById(briefcaseId, orderId);
+            return yield invoices_db_repositories_1.invoicesRepositories.getOrderInvoiceById(briefcaseId, orderId, userId);
         });
     },
-    createInvoice(body) {
+    createInvoice(body, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const invoiceOrderItems = [];
             let totalAmount = 0;
@@ -40,7 +40,8 @@ exports.invoicesService = {
             totalAmount = +(totalAmount + body.priceDelivery).toFixed(2);
             const finalTotalAmount = +(totalAmount * (1 - body.discount / 100)).toFixed(2);
             const invoice = Object.assign(Object.assign({}, body), { orderItems: invoiceOrderItems, totalAmount,
-                finalTotalAmount });
+                finalTotalAmount,
+                userId });
             return yield invoices_db_repositories_1.invoicesRepositories.createInvoice(invoice);
         });
     },

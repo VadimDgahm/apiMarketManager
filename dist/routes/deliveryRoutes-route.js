@@ -15,7 +15,8 @@ const delivery_routes_service_1 = require("../services/delivery-routes-service")
 exports.deliveryRoutesRoute = (0, express_1.Router)({});
 exports.deliveryRoutesRoute.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.getDeliveryRoutes();
+        const userId = req.user.id;
+        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.getDeliveryRoutes(userId);
         res.send(deliveryRoute);
     }
     catch (e) {
@@ -24,7 +25,8 @@ exports.deliveryRoutesRoute.get('/', (req, res, next) => __awaiter(void 0, void 
 }));
 exports.deliveryRoutesRoute.get('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.getDeliveryRoutesById(req.params.id);
+        const userId = req.user.id;
+        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.getDeliveryRoutesById(req.params.id, userId);
         res.send(deliveryRoute);
     }
     catch (e) {
@@ -34,7 +36,8 @@ exports.deliveryRoutesRoute.get('/:id', (req, res, next) => __awaiter(void 0, vo
 exports.deliveryRoutesRoute.post('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
-        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.createDeliveryRoute(body);
+        const userId = req.user.id;
+        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.createDeliveryRoute(body, userId);
         res.send(deliveryRoute);
     }
     catch (e) {
@@ -44,7 +47,8 @@ exports.deliveryRoutesRoute.post('/', (req, res, next) => __awaiter(void 0, void
 exports.deliveryRoutesRoute.delete('/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
-        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.removeDeliveryRoute(id);
+        const userId = req.user.id;
+        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.removeDeliveryRoute(id, userId);
         res.send(deliveryRoute);
     }
     catch (e) {
@@ -55,7 +59,8 @@ exports.deliveryRoutesRoute.put('/:id', (req, res, next) => __awaiter(void 0, vo
     try {
         const deliveryRouteId = req.params.id;
         const body = req.body;
-        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.updateDeliveryRoute(deliveryRouteId, body);
+        const userId = req.user.id;
+        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.updateDeliveryRoute(deliveryRouteId, body, userId);
         res.send(deliveryRoute);
     }
     catch (e) {
@@ -65,7 +70,8 @@ exports.deliveryRoutesRoute.put('/:id', (req, res, next) => __awaiter(void 0, vo
 exports.deliveryRoutesRoute.put('/sort/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
-        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.sortDeliveryRoute(body);
+        const userId = req.user.id;
+        const deliveryRoute = yield delivery_routes_service_1.deliveryRoutesService.sortDeliveryRoute(body, userId);
         res.send(deliveryRoute);
     }
     catch (e) {

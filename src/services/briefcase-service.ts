@@ -144,5 +144,6 @@ export type BriefcaseOrder = {
   priceDelivery?: number;
   finalTotalAmount?: number;
   markOrder?: boolean;
+  userId?: string;
 }
   
