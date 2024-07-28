@@ -7,6 +7,7 @@ import {
 } from '../services/briefcase-service';
 import {ObjectId} from "mongodb";
 import {BriefcasesDeliveryRouteType} from "../services/delivery-routes-service";
+import {invoicesService} from "../services/invoices-service";
 
 type GetUserType = {
     id?: string,
@@ -39,9 +40,13 @@ export const briefcaseRepositories = {
         return body
      },
      async removeBriefcase(id: string): Promise<void>{
-           const res = await briefcaseCollection.deleteOne({id})
-      },
-      async getPurchases(id: string): Promise<void>{
+           const res = await briefcaseCollection.deleteOne({id});
+
+           if(res.deletedCount) {
+             await invoicesService.deleteInvoicesByBriefcaseId(id);
+           }
+     },
+    async getPurchases(id: string): Promise<void>{
         const res = await briefcaseCollection.findOne({id})
     },
     async removeOrder(idBriefcase: string, orderId: string): Promise<any>{

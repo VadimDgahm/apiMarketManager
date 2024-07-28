@@ -90,6 +90,11 @@ exports.invoicesRepositories = {
         return __awaiter(this, void 0, void 0, function* () {
             return yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(drId) });
         });
+    },
+    deleteManyInvoices(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield db_1.invoicesCollection.deleteMany(query);
+        });
     }
 };
 //# sourceMappingURL=invoices-db-repositories.js.map

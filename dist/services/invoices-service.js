@@ -40,6 +40,11 @@ exports.invoicesService = {
                 finalTotalAmount });
             return yield invoices_db_repositories_1.invoicesRepositories.createInvoice(invoice);
         });
+    },
+    deleteInvoicesByBriefcaseId(briefcaseId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield invoices_db_repositories_1.invoicesRepositories.deleteManyInvoices({ briefcaseId });
+        });
     }
 };
 //# sourceMappingURL=invoices-service.js.map

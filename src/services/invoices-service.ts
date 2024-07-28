@@ -44,6 +44,10 @@ export const invoicesService = {
     }
 
     return await invoicesRepositories.createInvoice(invoice);
+  },
+
+  async deleteInvoicesByBriefcaseId(briefcaseId: string) {
+    return await invoicesRepositories.deleteManyInvoices({briefcaseId});
   }
 }
 
