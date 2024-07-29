@@ -68,8 +68,8 @@ exports.authRoute.get('/refresh', (req, res, next) => __awaiter(void 0, void 0, 
     try {
         const { refreshToken } = req.cookies;
         const userData = yield auth_service_1.authService.refresh(refreshToken);
-        res.cookie('accessToken', userData === null || userData === void 0 ? void 0 : userData.accessToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, });
-        res.cookie('refreshToken', userData === null || userData === void 0 ? void 0 : userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
+        res.cookie('accessToken', userData === null || userData === void 0 ? void 0 : userData.accessToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
+        res.cookie('refreshToken', userData === null || userData === void 0 ? void 0 : userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
         return res.send(userData);
     }
     catch (e) {
