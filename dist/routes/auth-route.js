@@ -40,7 +40,7 @@ exports.authRoute.post('/login', (req, res, next) => __awaiter(void 0, void 0, v
         res.cookie('accessToken', userData === null || userData === void 0 ? void 0 : userData.accessToken, { maxAge: 30 * 60 * 60 * 1000, httpOnly: true, sameSite: 'none', secure: true });
         res.cookie('refreshToken', userData.refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'none', secure: true });
         console.log('Login Access Token:', userData === null || userData === void 0 ? void 0 : userData.accessToken);
-        console.log('Login Refresh Token:', userData === null || userData === void 0 ? void 0 : userData.accessToken);
+        console.log('Login Refresh Token:', userData.refreshToken);
         return res.send(userData);
     }
     catch (e) {
@@ -83,23 +83,15 @@ exports.authRoute.get('/me', (req, res, next) => __awaiter(void 0, void 0, void 
         const { accessToken, refreshToken } = req.cookies;
         console.log('Access Token:', accessToken);
         console.log('Refresh Token:', refreshToken);
-        if (!accessToken || !refreshToken) {
-            return res.status(401).send({ message: "Пользователь не авторизован" });
+        if (refreshToken) {
+            res.status(200).send({ message: "Пользователь авторизован" });
         }
-        res.status(200).send({ message: "Пользователь авторизован" });
+        else
+            res.status(401).send({ message: "Пользователь не авторизован" });
     }
     catch (e) {
         next(e);
     }
-    // try {
-    //     const {refreshToken} = req.cookies;
-    //    if(refreshToken){
-    //     res.status(200).send({message: "Пользователь авторизован"})
-    //    }
-    //    else res.status(401).send({message: "Пользователь не авторизован"})
-    // } catch (e) {
-    //     next(e)
-    // }
 }));
 exports.authRoute.get('/', auth_middleware_1.authMiddleware, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     res.send('Hello world');
