@@ -12,9 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.catalogRepositories = void 0;
 const db_1 = require("./db");
 exports.catalogRepositories = {
-    getCatalog() {
+    getCatalog(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield db_1.catalogCollection.find().toArray();
+            return yield db_1.catalogCollection.find({ userId }).toArray();
         });
     },
     createProduct(body) {

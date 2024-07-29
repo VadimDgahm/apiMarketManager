@@ -5,8 +5,8 @@ import { ProductType, ProductTypeRequest } from '../services/catalog-service';
 
 
 export const catalogRepositories = {
-    async getCatalog() {
-      return await catalogCollection.find().toArray()
+    async getCatalog(userId: string) {
+      return await catalogCollection.find({userId}).toArray();
     },
     async createProduct(body: ProductType) {
       return await catalogCollection.insertOne(body)

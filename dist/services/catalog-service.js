@@ -13,9 +13,9 @@ exports.catalogService = void 0;
 const uuid_1 = require("uuid");
 const catalog_db_repositories_1 = require("../repositories/catalog-db-repositories");
 exports.catalogService = {
-    getCatalog() {
+    getCatalog(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield catalog_db_repositories_1.catalogRepositories.getCatalog();
+            return yield catalog_db_repositories_1.catalogRepositories.getCatalog(userId);
         });
     },
     createProduct({ name, type, userId, view, reductionName, price }) {

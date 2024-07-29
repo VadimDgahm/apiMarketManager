@@ -16,7 +16,8 @@ exports.catalogRoute = (0, express_1.Router)({});
 // @ts-ignore
 exports.catalogRoute.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield catalog_service_1.catalogService.getCatalog();
+        const userId = req.user.id;
+        const users = yield catalog_service_1.catalogService.getCatalog(userId);
         res.send(users);
     }
     catch (e) {

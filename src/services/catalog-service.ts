@@ -5,8 +5,8 @@ import {v4 as uuidv4} from 'uuid';
 import { catalogRepositories } from '../repositories/catalog-db-repositories';
 
 export const catalogService = {
-    async getCatalog() {
-        return await catalogRepositories.getCatalog()
+    async getCatalog(userId: string) {
+        return await catalogRepositories.getCatalog(userId);
     },
     async createProduct({name, type, userId, view,reductionName, price}:ProductTypeRequest) {
         const body: ProductType = {

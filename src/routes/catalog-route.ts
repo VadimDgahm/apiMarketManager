@@ -10,7 +10,8 @@ export const catalogRoute = Router({})
 // @ts-ignore
 catalogRoute.get('/', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-        const users =  await catalogService.getCatalog()
+        const userId = req.user.id;
+        const users =  await catalogService.getCatalog(userId);
         res.send(users)
     } catch (e) {
         next(e)
