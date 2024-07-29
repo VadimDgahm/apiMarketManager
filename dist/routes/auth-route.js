@@ -79,19 +79,19 @@ exports.authRoute.get('/refresh', (req, res, next) => __awaiter(void 0, void 0, 
     }
 }));
 exports.authRoute.get('/me', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    res.status(200).send({ message: "Пользователь авторизован" });
-    // try {
-    //     const {accessToken, refreshToken} = req.cookies;
-    //     console.log('Access Token:', accessToken);
-    //     console.log('Refresh Token:', refreshToken);
-    //
-    //    if(refreshToken){
-    //     res.status(200).send({message: "Пользователь авторизован"})
-    //    }
-    //    else res.status(401).send({message: "Пользователь не авторизован"})
-    // } catch (e) {
-    //     next(e)
-    // }
+    try {
+        const { accessToken, refreshToken } = req.cookies;
+        console.log('Access Token:', accessToken);
+        console.log('Refresh Token:', refreshToken);
+        if (refreshToken) {
+            res.status(200).send({ message: "Пользователь авторизован" });
+        }
+        else
+            res.status(401).send({ message: "Пользователь не авторизован" });
+    }
+    catch (e) {
+        next(e);
+    }
 }));
 exports.authRoute.get('/', auth_middleware_1.authMiddleware, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     res.send('Hello world');
