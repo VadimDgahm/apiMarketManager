@@ -72,15 +72,30 @@ authRoute.get('/refresh',
     authRoute.get('/me',
     async (req: Request, res: Response, next: NextFunction) => {
 
-        try {
-            const {refreshToken} = req.cookies;
-           if(refreshToken){
-            res.status(200).send({message: "Пользователь авторизован"})
-           }
-           else res.status(401).send({message: "Пользователь не авторизован"})
-        } catch (e) {
-            next(e)
+      try {
+        const { accessToken, refreshToken } = req.cookies;
+
+        console.log('Access Token:', accessToken);
+        console.log('Refresh Token:', refreshToken);
+
+
+        if (!accessToken || !refreshToken) {
+          return res.status(401).send({ message: "Пользователь не авторизован" });
         }
+
+        res.status(200).send({ message: "Пользователь авторизован" });
+      } catch (e) {
+        next(e);
+      }
+        // try {
+        //     const {refreshToken} = req.cookies;
+        //    if(refreshToken){
+        //     res.status(200).send({message: "Пользователь авторизован"})
+        //    }
+        //    else res.status(401).send({message: "Пользователь не авторизован"})
+        // } catch (e) {
+        //     next(e)
+        // }
     },)
 
 
