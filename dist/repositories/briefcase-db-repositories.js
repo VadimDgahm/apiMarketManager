@@ -134,8 +134,11 @@ exports.briefcaseRepositories = {
             }
             if (briefcase && newDeliveryRoute) {
                 briefcase.orders[orderIndex].deliveryRoute = { _id: body._id, name: body.name };
-                yield db_1.deliveryRoutesCollection.findOneAndUpdate({ _id: newDeliveryRoute._id }, { $set: newDeliveryRoute });
-                return yield db_1.briefcaseCollection.findOneAndUpdate({ id: idBriefcase }, { $set: { orders: briefcase.orders } });
+                const resultDR = yield db_1.deliveryRoutesCollection.findOneAndUpdate({ _id: newDeliveryRoute._id }, { $set: newDeliveryRoute });
+                if (resultDR) {
+                    return yield db_1.briefcaseCollection.findOneAndUpdate({ id: idBriefcase }, { $set: { orders: briefcase.orders } });
+                }
+                return;
             }
         });
     }
