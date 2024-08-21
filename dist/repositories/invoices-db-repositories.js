@@ -97,6 +97,11 @@ exports.invoicesRepositories = {
         return __awaiter(this, void 0, void 0, function* () {
             return yield db_1.invoicesCollection.deleteMany(query);
         });
+    },
+    getInvoicesByBriefcase(briefcaseId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return db_1.invoicesCollection.find({ briefcaseId });
+        });
     }
 };
 //# sourceMappingURL=invoices-db-repositories.js.map

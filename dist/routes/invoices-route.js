@@ -43,4 +43,13 @@ exports.invoicesRoute.post('/', (req, res, next) => __awaiter(void 0, void 0, vo
         next(e);
     }
 }));
+exports.invoicesRoute.get('/totalweight/:briefcase', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const totalWeight = yield invoices_service_1.invoicesService.getTotalWeightByBriefcaseId(req.params.briefcase);
+        res.send(totalWeight);
+    }
+    catch (e) {
+        next(e);
+    }
+}));
 //# sourceMappingURL=invoices-route.js.map

@@ -53,6 +53,24 @@ export const invoicesService = {
 
   async deleteInvoicesByBriefcaseId(briefcaseId: string) {
     return await invoicesRepositories.deleteManyInvoices({briefcaseId});
+  },
+
+  async getTotalWeightByBriefcaseId(briefcaseId: string) {
+    const invoices = await invoicesRepositories.getInvoicesByBriefcase(briefcaseId);
+
+    const res: { [key: string]: number } = {};
+    for await (const invoice of invoices) {
+      for  (const inv of invoice.orderItems) {
+        const name = inv.name;
+          if(res[name]) {
+            res[name] += inv.weight;
+          } else {
+            res[name] = inv.weight;
+          }
+      }
+    }
+
+    return res;
   }
 }
 

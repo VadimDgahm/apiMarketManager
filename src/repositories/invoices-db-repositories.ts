@@ -107,5 +107,9 @@ export const invoicesRepositories = {
 
   async deleteManyInvoices(query: Filter<InvoiceTypeRes>) {
     return await invoicesCollection.deleteMany(query);
+  },
+
+  async getInvoicesByBriefcase(briefcaseId: string) {
+    return invoicesCollection.find({briefcaseId});
   }
 }

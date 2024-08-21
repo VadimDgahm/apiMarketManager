@@ -34,3 +34,12 @@ invoicesRoute.post('/', async (req: AuthenticatedRequest, res: Response, next: N
   }
 });
 
+invoicesRoute.get('/totalweight/:briefcase', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const totalWeight = await invoicesService.getTotalWeightByBriefcaseId(req.params.briefcase);
+    res.send(totalWeight);
+  } catch (e) {
+    next(e)
+  }
+});
+
