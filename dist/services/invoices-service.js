@@ -8,13 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.invoicesService = void 0;
 const invoices_db_repositories_1 = require("../repositories/invoices-db-repositories");
@@ -46,10 +39,20 @@ exports.invoicesService = {
             }
             totalAmount = +(totalAmount + body.priceDelivery).toFixed(2);
             const finalTotalAmount = +(totalAmount * (1 - body.discount / 100)).toFixed(2);
-            const invoice = Object.assign(Object.assign({}, body), { orderItems: invoiceOrderItems, totalAmount,
-                finalTotalAmount,
-                userId });
-            return yield invoices_db_repositories_1.invoicesRepositories.createInvoice(invoice);
+            const updatedFields = {
+                "orders.$[order].invoiceOrderItems": invoiceOrderItems,
+                "orders.$[order].discount": body.discount,
+                "orders.$[order].priceDelivery": body.priceDelivery,
+                "orders.$[order].markOrder": body.markOrder,
+                "orders.$[order].totalAmount": totalAmount,
+                "orders.$[order].finalTotalAmount": finalTotalAmount
+            };
+            const result = yield db_1.briefcaseCollection.updateOne({ "orders.orderId": body.orderId }, { $set: updatedFields }, {
+                arrayFilters: [{ "order.orderId": body.orderId }],
+                upsert: false
+            });
+            console.log(`${result.modifiedCount} документ(ов) обновлено`);
+            return result;
         });
     },
     deleteInvoicesByBriefcaseId(briefcaseId) {
@@ -58,32 +61,21 @@ exports.invoicesService = {
         });
     },
     getTotalWeightByBriefcaseId(briefcaseId) {
-        var _a, e_1, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
-            const invoices = yield invoices_db_repositories_1.invoicesRepositories.getInvoicesByBriefcase(briefcaseId);
+            const brief = yield db_1.briefcaseCollection.findOne({ id: briefcaseId });
             const res = {};
-            try {
-                for (var _d = true, invoices_1 = __asyncValues(invoices), invoices_1_1; invoices_1_1 = yield invoices_1.next(), _a = invoices_1_1.done, !_a; _d = true) {
-                    _c = invoices_1_1.value;
-                    _d = false;
-                    const invoice = _c;
-                    for (const inv of invoice.orderItems) {
-                        const name = inv.name;
+            for (const order of brief.orders) {
+                if (order.invoiceOrderItems) {
+                    for (const item of order.invoiceOrderItems) {
+                        const name = item.name;
                         if (res[name]) {
-                            res[name] += inv.weight;
+                            res[name] += item.weight;
                         }
                         else {
-                            res[name] = inv.weight;
+                            res[name] = item.weight;
                         }
                     }
                 }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (!_d && !_a && (_b = invoices_1.return)) yield _b.call(invoices_1);
-                }
-                finally { if (e_1) throw e_1.error; }
             }
             return res;
         });

@@ -21,46 +21,55 @@ export const invoicesRepositories = {
 
     if (deliveryRoute?.briefcases && deliveryRoute?.briefcases?.length >= 0) {
       for (const deliveryRouteBriefcase of deliveryRoute.briefcases) {
-        const briefcase = await briefcaseCollection.findOne({id: deliveryRouteBriefcase.id})
-        const orders: BriefcaseOrder[] = [];
 
-        for (const deliveryRouteOrderId of deliveryRouteBriefcase.orderIds) {
-          orders.push(...briefcase.orders.filter(order => {
-            if(order.orderId === deliveryRouteOrderId.orderId) {
-              order.sort = deliveryRouteOrderId.sort;
-              order.briefcaseId = deliveryRouteBriefcase.id;
-              order.time = deliveryRouteOrderId.time;
-              return order;
+        const resBrief = await briefcaseCollection.aggregate([
+          { $match: { id:deliveryRouteBriefcase.id, userId } },
+          {
+            $project: {
+              id: 1,
+              name: 1,
+              createdDate: 1,
+              orders: {
+                $filter: {
+                  input: "$orders",
+                  as: "order",
+                  cond: { $eq: ["$$order.deliveryRoute._id", id] }
+                }
+              }
             }
-          }));
+          }
+        ]).toArray();
+
+        const briefcase = resBrief[0];
+        const orderMap:Map<string, BriefcaseOrder> = new Map();
+
+        for (const order of briefcase.orders) {
+          orderMap.set(order.orderId, order);
         }
 
-        for (const order of orders) {
-          const client = await clientCollection.findOne({id: order.clientId});
-          order.dataClient = {
-            name: client.name,
-            status: client.status,
-            source: client.source,
-            phones: client.phones,
-            addresses: client.addresses
-          };
+        for (const deliveryRouteOrderId of deliveryRouteBriefcase.orderIds) {
+          const order = orderMap.get(deliveryRouteOrderId.orderId);
 
-          const invoice = await invoicesCollection.findOne({orderId:order.orderId});
+          if (order) {
+            const client = await clientCollection.findOne({id: order.clientId});
 
-          if(invoice) {
-            order.markOrder = invoice.markOrder;
-            order.invoiceOrderItems = invoice.orderItems;
+            order.dataClient = {
+              name: client.name,
+              status: client.status,
+              source: client.source,
+              phones: client.phones,
+              addresses: client.addresses
+            };
 
-            order.totalAmount = invoice.totalAmount;
-            order.finalTotalAmount = invoice.finalTotalAmount;
-            order.discount = invoice.discount;
-            order.priceDelivery = invoice.priceDelivery;
+            result.drTotalAmount += order.finalTotalAmount ?? 0
 
-            result.drTotalAmount += order.finalTotalAmount;
+            order.sort = deliveryRouteOrderId.sort;
+            order.briefcaseId = deliveryRouteBriefcase.id;
+            order.time = deliveryRouteOrderId.time;
           }
         }
 
-        result.orders.push(...orders);
+        result.orders.push(...briefcase.orders);
       }
     }
 
@@ -82,22 +91,23 @@ export const invoicesRepositories = {
   },
 
   async getOrderInvoiceById(briefcaseId: string, orderId: string, userId: string) {
-    const res = await briefcaseCollection.findOne({id: briefcaseId, userId});
-
-    if(res) {
-      const order = res.orders.find((o) => o.orderId === orderId);
-      const invoice = await invoicesCollection.findOne({orderId:order.orderId});
-
-      if (invoice) {
-        order.invoiceOrderItems = invoice.orderItems;
-        order.totalAmount = invoice.totalAmount;
-        order.finalTotalAmount = invoice.finalTotalAmount;
-        order.discount = invoice.discount;
-        order.priceDelivery = invoice.priceDelivery;
-        order.userId = userId;
+    const briefcase = await briefcaseCollection.aggregate([
+      { $match: { id:briefcaseId, userId } },
+      {
+        $project: {
+          orders: {
+            $filter: {
+              input: "$orders",
+              as: "order",
+              cond: { $eq: ["$$order.orderId", orderId] }
+            }
+          }
+        }
       }
+    ]).toArray();
 
-      return order;
+    if(briefcase[0].orders[0]) {
+      return briefcase[0].orders[0];
     }
   },
 
