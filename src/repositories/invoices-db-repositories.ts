@@ -23,7 +23,7 @@ export const invoicesRepositories = {
       for (const deliveryRouteBriefcase of deliveryRoute.briefcases) {
 
         const resBrief = await briefcaseCollection.aggregate([
-          { $match: { id:deliveryRouteBriefcase.id, userId } },
+          { $match: { id: deliveryRouteBriefcase.id, userId } },
           {
             $project: {
               id: 1,
@@ -34,6 +34,45 @@ export const invoicesRepositories = {
                   input: "$orders",
                   as: "order",
                   cond: { $eq: ["$$order.deliveryRoute._id", id] }
+                }
+              }
+            }
+          },
+          {
+            $unwind: "$orders"
+          },
+          {
+            $lookup: {
+              from: "clients",
+              localField: "orders.clientId",
+              foreignField: "id",
+              as: "orderClientData"
+            }
+          },
+          {
+            $unwind: {
+              path: "$orderClientData",
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $group: {
+              _id: "$_id",
+              id: { $first: "$id" },
+              orders: {
+                $push: {
+                  $mergeObjects: [
+                    "$orders",
+                    {
+                      dataClient: {
+                        name: "$orderClientData.name",
+                        status: "$orderClientData.status",
+                        source: "$orderClientData.source",
+                        phones: "$orderClientData.phones",
+                        addresses: "$orderClientData.addresses"
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -51,16 +90,6 @@ export const invoicesRepositories = {
           const order = orderMap.get(deliveryRouteOrderId.orderId);
 
           if (order) {
-            // const client = await clientCollection.findOne({id: order.clientId});
-            //
-            // order.dataClient = {
-            //   name: client.name,
-            //   status: client.status,
-            //   source: client.source,
-            //   phones: client.phones,
-            //   addresses: client.addresses
-            // };
-
             result.drTotalAmount += order.finalTotalAmount ?? 0
 
             order.sort = deliveryRouteOrderId.sort;

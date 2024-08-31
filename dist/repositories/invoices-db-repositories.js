@@ -35,6 +35,45 @@ exports.invoicesRepositories = {
                                     }
                                 }
                             }
+                        },
+                        {
+                            $unwind: "$orders"
+                        },
+                        {
+                            $lookup: {
+                                from: "clients",
+                                localField: "orders.clientId",
+                                foreignField: "id",
+                                as: "orderClientData"
+                            }
+                        },
+                        {
+                            $unwind: {
+                                path: "$orderClientData",
+                                preserveNullAndEmptyArrays: true
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: "$_id",
+                                id: { $first: "$id" },
+                                orders: {
+                                    $push: {
+                                        $mergeObjects: [
+                                            "$orders",
+                                            {
+                                                dataClient: {
+                                                    name: "$orderClientData.name",
+                                                    status: "$orderClientData.status",
+                                                    source: "$orderClientData.source",
+                                                    phones: "$orderClientData.phones",
+                                                    addresses: "$orderClientData.addresses"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
                         }
                     ]).toArray();
                     const briefcase = resBrief[0];
@@ -45,15 +84,6 @@ exports.invoicesRepositories = {
                     for (const deliveryRouteOrderId of deliveryRouteBriefcase.orderIds) {
                         const order = orderMap.get(deliveryRouteOrderId.orderId);
                         if (order) {
-                            // const client = await clientCollection.findOne({id: order.clientId});
-                            //
-                            // order.dataClient = {
-                            //   name: client.name,
-                            //   status: client.status,
-                            //   source: client.source,
-                            //   phones: client.phones,
-                            //   addresses: client.addresses
-                            // };
                             result.drTotalAmount += (_b = order.finalTotalAmount) !== null && _b !== void 0 ? _b : 0;
                             order.sort = deliveryRouteOrderId.sort;
                             order.briefcaseId = deliveryRouteBriefcase.id;
