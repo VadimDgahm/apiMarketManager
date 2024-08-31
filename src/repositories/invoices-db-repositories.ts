@@ -51,15 +51,15 @@ export const invoicesRepositories = {
           const order = orderMap.get(deliveryRouteOrderId.orderId);
 
           if (order) {
-            const client = await clientCollection.findOne({id: order.clientId});
-
-            order.dataClient = {
-              name: client.name,
-              status: client.status,
-              source: client.source,
-              phones: client.phones,
-              addresses: client.addresses
-            };
+            // const client = await clientCollection.findOne({id: order.clientId});
+            //
+            // order.dataClient = {
+            //   name: client.name,
+            //   status: client.status,
+            //   source: client.source,
+            //   phones: client.phones,
+            //   addresses: client.addresses
+            // };
 
             result.drTotalAmount += order.finalTotalAmount ?? 0
 

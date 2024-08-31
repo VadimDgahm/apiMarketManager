@@ -45,14 +45,15 @@ exports.invoicesRepositories = {
                     for (const deliveryRouteOrderId of deliveryRouteBriefcase.orderIds) {
                         const order = orderMap.get(deliveryRouteOrderId.orderId);
                         if (order) {
-                            const client = yield db_1.clientCollection.findOne({ id: order.clientId });
-                            order.dataClient = {
-                                name: client.name,
-                                status: client.status,
-                                source: client.source,
-                                phones: client.phones,
-                                addresses: client.addresses
-                            };
+                            // const client = await clientCollection.findOne({id: order.clientId});
+                            //
+                            // order.dataClient = {
+                            //   name: client.name,
+                            //   status: client.status,
+                            //   source: client.source,
+                            //   phones: client.phones,
+                            //   addresses: client.addresses
+                            // };
                             result.drTotalAmount += (_b = order.finalTotalAmount) !== null && _b !== void 0 ? _b : 0;
                             order.sort = deliveryRouteOrderId.sort;
                             order.briefcaseId = deliveryRouteBriefcase.id;
