@@ -19,36 +19,83 @@ exports.deliveryRoutesRepositories = {
         });
     },
     getDeliveryRoutesById(id, userId) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             const deliveryRoute = yield db_1.deliveryRoutesCollection.findOne({ _id: new mongodb_1.ObjectId(id), userId });
             const result = Object.assign(Object.assign({}, deliveryRoute), { orders: [] });
             if ((deliveryRoute === null || deliveryRoute === void 0 ? void 0 : deliveryRoute.briefcases) && ((_a = deliveryRoute === null || deliveryRoute === void 0 ? void 0 : deliveryRoute.briefcases) === null || _a === void 0 ? void 0 : _a.length) >= 0) {
                 for (const deliveryRouteBriefcase of deliveryRoute.briefcases) {
-                    const briefcase = yield db_1.briefcaseCollection.findOne({ id: deliveryRouteBriefcase.id });
-                    const orders = [];
-                    for (const deliveryRouteOrderId of deliveryRouteBriefcase.orderIds) {
-                        orders.push(...briefcase.orders.filter(order => {
-                            if (order.orderId === deliveryRouteOrderId.orderId) {
-                                order.sort = deliveryRouteOrderId.sort;
-                                order.briefcaseId = deliveryRouteBriefcase.id;
-                                order.time = deliveryRouteOrderId.time;
-                                return order;
+                    const resBrief = yield db_1.briefcaseCollection.aggregate([
+                        { $match: { id: deliveryRouteBriefcase.id, userId } },
+                        {
+                            $project: {
+                                id: 1,
+                                name: 1,
+                                createdDate: 1,
+                                orders: {
+                                    $filter: {
+                                        input: "$orders",
+                                        as: "order",
+                                        cond: { $eq: ["$$order.deliveryRoute._id", id] }
+                                    }
+                                }
                             }
-                        }));
+                        },
+                        {
+                            $unwind: "$orders"
+                        },
+                        {
+                            $lookup: {
+                                from: "clients",
+                                localField: "orders.clientId",
+                                foreignField: "id",
+                                as: "orderClientData"
+                            }
+                        },
+                        {
+                            $unwind: {
+                                path: "$orderClientData",
+                                preserveNullAndEmptyArrays: true
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: "$_id",
+                                id: { $first: "$id" },
+                                orders: {
+                                    $push: {
+                                        $mergeObjects: [
+                                            "$orders",
+                                            {
+                                                dataClient: {
+                                                    name: "$orderClientData.name",
+                                                    status: "$orderClientData.status",
+                                                    source: "$orderClientData.source",
+                                                    phones: "$orderClientData.phones",
+                                                    addresses: "$orderClientData.addresses"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    ]).toArray();
+                    const briefcase = resBrief[0];
+                    const orderMap = new Map();
+                    for (const order of briefcase.orders) {
+                        orderMap.set(order.orderId, order);
                     }
-                    // const orders = briefcase.orders.filter(order => deliveryRouteBriefcase.orderIds.includes(order.orderId));
-                    for (const order of orders) {
-                        const client = yield db_1.clientCollection.findOne({ id: order.clientId });
-                        order.dataClient = {
-                            name: client.name,
-                            status: client.status,
-                            source: client.source,
-                            phones: client.phones,
-                            addresses: client.addresses
-                        };
+                    for (const deliveryRouteOrderId of deliveryRouteBriefcase.orderIds) {
+                        const order = orderMap.get(deliveryRouteOrderId.orderId);
+                        if (order) {
+                            result.drTotalAmount += (_b = order.finalTotalAmount) !== null && _b !== void 0 ? _b : 0;
+                            order.sort = deliveryRouteOrderId.sort;
+                            order.briefcaseId = deliveryRouteBriefcase.id;
+                            order.time = deliveryRouteOrderId.time;
+                        }
                     }
-                    result.orders.push(...orders);
+                    result.orders.push(...briefcase.orders);
                 }
             }
             const sortOrder = (a, b) => {

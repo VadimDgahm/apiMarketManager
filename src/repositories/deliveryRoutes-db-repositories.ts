@@ -16,34 +16,83 @@ export const deliveryRoutesRepositories = {
 
     if (deliveryRoute?.briefcases && deliveryRoute?.briefcases?.length >= 0) {
       for (const deliveryRouteBriefcase of deliveryRoute.briefcases) {
-        const briefcase = await briefcaseCollection.findOne({id: deliveryRouteBriefcase.id})
-        const orders: BriefcaseOrder[] = [];
+        const resBrief = await briefcaseCollection.aggregate([
+          { $match: { id: deliveryRouteBriefcase.id, userId } },
+          {
+            $project: {
+              id: 1,
+              name: 1,
+              createdDate: 1,
+              orders: {
+                $filter: {
+                  input: "$orders",
+                  as: "order",
+                  cond: { $eq: ["$$order.deliveryRoute._id", id] }
+                }
+              }
+            }
+          },
+          {
+            $unwind: "$orders"
+          },
+          {
+            $lookup: {
+              from: "clients",
+              localField: "orders.clientId",
+              foreignField: "id",
+              as: "orderClientData"
+            }
+          },
+          {
+            $unwind: {
+              path: "$orderClientData",
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $group: {
+              _id: "$_id",
+              id: { $first: "$id" },
+              orders: {
+                $push: {
+                  $mergeObjects: [
+                    "$orders",
+                    {
+                      dataClient: {
+                        name: "$orderClientData.name",
+                        status: "$orderClientData.status",
+                        source: "$orderClientData.source",
+                        phones: "$orderClientData.phones",
+                        addresses: "$orderClientData.addresses"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]).toArray();
+
+        const briefcase = resBrief[0];
+        const orderMap:Map<string, BriefcaseOrder> = new Map();
+
+        for (const order of briefcase.orders) {
+          orderMap.set(order.orderId, order);
+        }
 
         for (const deliveryRouteOrderId of deliveryRouteBriefcase.orderIds) {
-          orders.push(...briefcase.orders.filter(order => {
-            if(order.orderId === deliveryRouteOrderId.orderId) {
-              order.sort = deliveryRouteOrderId.sort;
-              order.briefcaseId = deliveryRouteBriefcase.id;
-              order.time = deliveryRouteOrderId.time;
-              return order;
-            }
-          }));
+          const order = orderMap.get(deliveryRouteOrderId.orderId);
+
+          if (order) {
+            result.drTotalAmount += order.finalTotalAmount ?? 0
+
+            order.sort = deliveryRouteOrderId.sort;
+            order.briefcaseId = deliveryRouteBriefcase.id;
+            order.time = deliveryRouteOrderId.time;
+          }
         }
 
-        // const orders = briefcase.orders.filter(order => deliveryRouteBriefcase.orderIds.includes(order.orderId));
-
-        for (const order of orders) {
-          const client = await clientCollection.findOne({id: order.clientId});
-          order.dataClient = {
-            name: client.name,
-            status: client.status,
-            source: client.source,
-            phones: client.phones,
-            addresses: client.addresses
-          };
-        }
-
-        result.orders.push(...orders);
+        result.orders.push(...briefcase.orders);
       }
     }
 
