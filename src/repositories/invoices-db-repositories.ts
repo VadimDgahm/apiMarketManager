@@ -139,8 +139,9 @@ export const invoicesRepositories = {
 
     if(order) {
       order.userId = userId;
-      return order;
     }
+
+    return order;
   },
 
   async getDR(drId: string) {

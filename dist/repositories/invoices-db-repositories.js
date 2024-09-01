@@ -128,8 +128,8 @@ exports.invoicesRepositories = {
             const order = (_a = briefcase[0].orders[0]) !== null && _a !== void 0 ? _a : null;
             if (order) {
                 order.userId = userId;
-                return order;
             }
+            return order;
         });
     },
     getDR(drId) {
