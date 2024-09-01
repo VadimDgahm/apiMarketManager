@@ -27,9 +27,53 @@ exports.briefcaseRepositories = {
     },
     getBriefcaseById(briefcaseId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const briefcase = yield db_1.briefcaseCollection.findOne({ id: briefcaseId, userId });
-            briefcase.orders.reverse();
-            return briefcase;
+            const resBrief = yield db_1.briefcaseCollection.aggregate([
+                { $match: { id: briefcaseId, userId } },
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "orders.clientId",
+                        foreignField: "id",
+                        as: "orderClientData"
+                    }
+                },
+                {
+                    $project: {
+                        id: 1,
+                        name: 1,
+                        createdDate: 1,
+                        userId: 1,
+                        orders: {
+                            $reverseArray: {
+                                $map: {
+                                    input: "$orders",
+                                    as: "order",
+                                    in: {
+                                        $mergeObjects: [
+                                            "$$order",
+                                            {
+                                                dataClient: {
+                                                    $arrayElemAt: [
+                                                        {
+                                                            $filter: {
+                                                                input: "$orderClientData",
+                                                                as: "client",
+                                                                cond: { $eq: ["$$client.id", "$$order.clientId"] }
+                                                            }
+                                                        },
+                                                        0
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]).toArray();
+            return resBrief[0];
         });
     },
     createBriefcase(order) {

@@ -24,11 +24,54 @@ export const briefcaseRepositories = {
         }
     },
     async getBriefcaseById(briefcaseId: string, userId: string) {
-        const briefcase = await briefcaseCollection.findOne({id:briefcaseId, userId})
+      const resBrief = await briefcaseCollection.aggregate([
+        { $match: { id: briefcaseId, userId } },
+        {
+          $lookup: {
+            from: "clients",
+            localField: "orders.clientId",
+            foreignField: "id",
+            as: "orderClientData"
+          }
+        },
+        {
+          $project: {
+            id: 1,
+            name: 1,
+            createdDate: 1,
+            userId: 1,
+            orders: {
+              $reverseArray: {
+                $map: {
+                  input: "$orders",
+                  as: "order",
+                  in: {
+                    $mergeObjects: [
+                      "$$order",
+                      {
+                        dataClient: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$orderClientData",
+                                as: "client",
+                                cond: { $eq: ["$$client.id", "$$order.clientId"] }
+                              }
+                            },
+                            0
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]).toArray();
 
-        briefcase.orders.reverse()
-
-        return briefcase
+      return resBrief[0];
     },
     async createBriefcase(order: BriefcaseType): Promise<BriefcaseType>{
        await briefcaseCollection.insertOne(order)

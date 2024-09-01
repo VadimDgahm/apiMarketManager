@@ -18,24 +18,7 @@ export const briefcaseService = {
     //     })
     // },
     async getBriefcaseById(briefcaseId: string, userId: string) {
-        const briefcase = await briefcaseRepositories.getBriefcaseById(briefcaseId, userId);
-        const processedOrders = await Promise.all(
-          briefcase.orders.map(async (order) => {
-            const client = await clientCollection.findOne({ id: order.clientId, userId });
-            const dataClient = {
-                name: client.name,
-                status: client.status,
-                source: client.source,
-                phones: client.phones,
-                addresses: client.addresses
-            }
-            const processedOrder = { ...order, dataClient };
-            // Выполните любые другие необходимые операции с обработанным заказом
-            return processedOrder;
-          })
-        );
-      
-        return { ...briefcase,orders: processedOrders};
+        return await briefcaseRepositories.getBriefcaseById(briefcaseId, userId);
       },
     async createBriefcase({name}:RequestCreateBriefcase, userId: string) {
         const body: BriefcaseType = {

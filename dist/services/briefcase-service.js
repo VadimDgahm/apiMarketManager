@@ -13,7 +13,6 @@ exports.briefcaseService = void 0;
 const uuid_1 = require("uuid");
 const utils_1 = require("../utils/utils");
 const briefcase_db_repositories_1 = require("../repositories/briefcase-db-repositories");
-const db_1 = require("../repositories/db");
 exports.briefcaseService = {
     getBriefcase(userId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -29,21 +28,7 @@ exports.briefcaseService = {
     // },
     getBriefcaseById(briefcaseId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const briefcase = yield briefcase_db_repositories_1.briefcaseRepositories.getBriefcaseById(briefcaseId, userId);
-            const processedOrders = yield Promise.all(briefcase.orders.map((order) => __awaiter(this, void 0, void 0, function* () {
-                const client = yield db_1.clientCollection.findOne({ id: order.clientId, userId });
-                const dataClient = {
-                    name: client.name,
-                    status: client.status,
-                    source: client.source,
-                    phones: client.phones,
-                    addresses: client.addresses
-                };
-                const processedOrder = Object.assign(Object.assign({}, order), { dataClient });
-                // Выполните любые другие необходимые операции с обработанным заказом
-                return processedOrder;
-            })));
-            return Object.assign(Object.assign({}, briefcase), { orders: processedOrders });
+            return yield briefcase_db_repositories_1.briefcaseRepositories.getBriefcaseById(briefcaseId, userId);
         });
     },
     createBriefcase({ name }, userId) {
