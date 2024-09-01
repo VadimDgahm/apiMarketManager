@@ -31,8 +31,7 @@ authRoute.post('/login',
             const userData = await authService.login(email,password)
             res.cookie('accessToken', userData?.accessToken, {maxAge: 30 * 60 * 60 * 1000 , httpOnly: true, sameSite: 'none', secure: true})
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'none', secure: true})
-            console.log('Login Access Token:', userData?.accessToken);
-            console.log('Login Refresh Token:', userData.refreshToken);
+
             return  res.send(userData)
         } catch (e) {
             next(e)

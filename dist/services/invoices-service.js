@@ -51,7 +51,6 @@ exports.invoicesService = {
                 arrayFilters: [{ "order.orderId": body.orderId }],
                 upsert: false
             });
-            console.log(`${result.modifiedCount} документ(ов) обновлено`);
             return result;
         });
     },

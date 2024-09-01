@@ -58,8 +58,6 @@ export const invoicesService = {
       }
     );
 
-    console.log(`${result.modifiedCount} документ(ов) обновлено`);
-
     return result;
   },
 
