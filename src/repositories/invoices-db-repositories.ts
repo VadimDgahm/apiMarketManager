@@ -135,8 +135,11 @@ export const invoicesRepositories = {
       }
     ]).toArray();
 
-    if(briefcase[0].orders[0]) {
-      return briefcase[0].orders[0];
+    const order = briefcase[0].orders[0] ?? null;
+
+    if(order) {
+      order.userId = userId;
+      return order;
     }
   },
 

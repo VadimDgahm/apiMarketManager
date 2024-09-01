@@ -109,6 +109,7 @@ exports.invoicesRepositories = {
         });
     },
     getOrderInvoiceById(briefcaseId, orderId, userId) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const briefcase = yield db_1.briefcaseCollection.aggregate([
                 { $match: { id: briefcaseId, userId } },
@@ -124,8 +125,10 @@ exports.invoicesRepositories = {
                     }
                 }
             ]).toArray();
-            if (briefcase[0].orders[0]) {
-                return briefcase[0].orders[0];
+            const order = (_a = briefcase[0].orders[0]) !== null && _a !== void 0 ? _a : null;
+            if (order) {
+                order.userId = userId;
+                return order;
             }
         });
     },
