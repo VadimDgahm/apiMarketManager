@@ -35,7 +35,7 @@ exports.invoicesService = {
                     amount = +(product.price * item.weight).toFixed(2);
                 }
                 totalAmount += amount;
-                invoiceOrderItems.push(Object.assign(Object.assign({}, item), { productPrice: product.price, name: product.name, amount: amount, units: item.units, comments: item.comments }));
+                invoiceOrderItems.push(Object.assign(Object.assign({}, item), { productPrice: product.price, name: product.name, amount: amount, units: item.units, comments: item.comments, view: product.view }));
             }
             totalAmount = +(totalAmount + body.priceDelivery).toFixed(2);
             const finalTotalAmount = +(totalAmount * (1 - body.discount / 100)).toFixed(2);
@@ -62,21 +62,24 @@ exports.invoicesService = {
     getTotalWeightByBriefcaseId(briefcaseId) {
         return __awaiter(this, void 0, void 0, function* () {
             const brief = yield db_1.briefcaseCollection.findOne({ id: briefcaseId });
-            const res = {};
+            const viewResult = new Map();
             for (const order of brief.orders) {
                 if (order.invoiceOrderItems) {
                     for (const item of order.invoiceOrderItems) {
-                        const name = item.name;
-                        if (res[name]) {
-                            res[name] += item.weight;
+                        const product = viewResult.get(item.view);
+                        if (product) {
+                            product[item.name] ? product[item.name] += item.weight : product[item.name] = item.weight;
                         }
                         else {
-                            res[name] = item.weight;
+                            viewResult.set(item.view, { [item.name]: item.weight });
                         }
                     }
                 }
             }
-            return res;
+            return Array.from(viewResult, ([view, products]) => ({
+                view,
+                products
+            }));
         });
     }
 };

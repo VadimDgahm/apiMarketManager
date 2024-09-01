@@ -32,7 +32,8 @@ export const invoicesService = {
         name: product.name,
         amount: amount,
         units: item.units,
-        comments: item.comments
+        comments: item.comments,
+        view: product.view
       });
 
     }
@@ -67,22 +68,26 @@ export const invoicesService = {
 
   async getTotalWeightByBriefcaseId(briefcaseId: string) {
     const brief = await briefcaseCollection.findOne({id:briefcaseId});
-    const res: { [key: string]: number } = {};
+    const viewResult: Map<string, { [key: string]: number } > = new Map();
 
     for (const order of brief.orders) {
       if(order.invoiceOrderItems) {
         for  (const item of order.invoiceOrderItems) {
-          const name = item.name;
-          if (res[name]) {
-            res[name] += item.weight;
+          const product = viewResult.get(item.view);
+
+          if(product) {
+            product[item.name] ? product[item.name] += item.weight : product[item.name] = item.weight;
           } else {
-            res[name] = item.weight;
+            viewResult.set(item.view, {[item.name]: item.weight});
           }
         }
       }
     }
 
-    return res;
+    return Array.from(viewResult, ([view, products]) => ({
+      view,
+      products
+    }));
   }
 }
 
@@ -98,7 +103,8 @@ export type OrderItemsRequest = {
 export type OrderItemsResponse = {
   productPrice: number;
   amount: number;
-  name: string
+  name: string;
+  view: string;
 
 } & OrderItemsRequest;
 
