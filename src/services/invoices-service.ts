@@ -32,8 +32,7 @@ export const invoicesService = {
         name: product.name,
         amount: amount,
         units: item.units,
-        comments: item.comments,
-        view: product.view
+        comments: item.comments
       });
 
     }
@@ -67,28 +66,134 @@ export const invoicesService = {
   },
 
   async getTotalWeightByBriefcaseId(briefcaseId: string) {
-    const brief = await briefcaseCollection.findOne({id:briefcaseId});
-    const viewResult: Map<string, { [key: string]: number } > = new Map();
-
-    for (const order of brief.orders) {
-      if(order.invoiceOrderItems) {
-        for  (const item of order.invoiceOrderItems) {
-          const product = viewResult.get(item.view);
-
-          if(product) {
-            product[item.name] ? product[item.name] += item.weight : product[item.name] = item.weight;
-          } else {
-            viewResult.set(item.view, {[item.name]: item.weight});
+    const brief = await briefcaseCollection.aggregate([
+      { $match: { id: briefcaseId } },
+      { $unwind: "$orders" },
+      {
+        $lookup: {
+          from: "catalog",
+          let: { productId: "$orders.invoiceOrderItems.productId" },
+          pipeline: [
+            { $match: { $expr: { $in: ["$_id", { $map: { input: "$$productId", as: "pid", in: { $toObjectId: "$$pid" } } }] } } },
+            { $project: { sortValue: 1, view: 1 } }
+          ],
+          as: "catalogData"
+        }
+      },
+      {
+        $addFields: {
+          "orders.invoiceOrderItems": {
+            $map: {
+              input: "$orders.invoiceOrderItems",
+              as: "item",
+              in: {
+                $mergeObjects: [
+                  "$$item",
+                  {
+                    sortValue: {
+                      $ifNull: [
+                        {
+                          $arrayElemAt: [
+                            {
+                              $map: {
+                                input: {
+                                  $filter: {
+                                    input: "$catalogData",
+                                    as: "catalogItem",
+                                    cond: { $eq: ["$$catalogItem._id", { $toObjectId: "$$item.productId" }] }
+                                  }
+                                },
+                                as: "filteredCatalog",
+                                in: "$$filteredCatalog.sortValue"
+                              }
+                            },
+                            0
+                          ]
+                        },
+                        0
+                      ]
+                    },
+                    view: {
+                      $ifNull: [
+                        {
+                          $arrayElemAt: [
+                            {
+                              $map: {
+                                input: {
+                                  $filter: {
+                                    input: "$catalogData",
+                                    as: "catalogItem",
+                                    cond: { $eq: ["$$catalogItem._id", { $toObjectId: "$$item.productId" }] }
+                                  }
+                                },
+                                as: "filteredCatalog",
+                                in: "$$filteredCatalog.view"
+                              }
+                            },
+                            0
+                          ]
+                        },
+                        null
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
           }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          orders: { $push: "$orders" }
+        }
+      }
+    ]).toArray();
+
+    const viewData: ViewDataMap = {};
+
+    for (const order of brief[0].orders) {
+      if (order.invoiceOrderItems) {
+        for (const item of order.invoiceOrderItems) {
+          if (!viewData[item.view]) {
+            viewData[item.view] = {};
+          }
+
+          if (!viewData[item.view][item.name]) {
+            viewData[item.view][item.name] = {
+              sortValue: item.sortValue || 0,
+              weight: 0
+            };
+          }
+
+          viewData[item.view][item.name].weight += item.weight;
         }
       }
     }
 
-    return Array.from(viewResult, ([view, products]) => ({
+    return Object.keys(viewData).map(view => ({
       view,
-      products
+      products: Object.keys(viewData[view]).map(name => ({
+        name,
+        sortValue: viewData[view][name].sortValue,
+        weight: viewData[view][name].weight
+      })).sort((a, b) => a.sortValue - b.sortValue)
     }));
   }
+}
+
+interface ProductData {
+  sortValue: number;
+  weight: number;
+}
+
+interface ViewData {
+  [name: string]: ProductData;
+}
+
+interface ViewDataMap {
+  [view: string]: ViewData;
 }
 
 export type OrderItemsRequest = {
@@ -104,7 +209,8 @@ export type OrderItemsResponse = {
   productPrice: number;
   amount: number;
   name: string;
-  view: string;
+  view?: string;
+  sortValue?: number
 
 } & OrderItemsRequest;
 

@@ -35,7 +35,7 @@ exports.invoicesService = {
                     amount = +(product.price * item.weight).toFixed(2);
                 }
                 totalAmount += amount;
-                invoiceOrderItems.push(Object.assign(Object.assign({}, item), { productPrice: product.price, name: product.name, amount: amount, units: item.units, comments: item.comments, view: product.view }));
+                invoiceOrderItems.push(Object.assign(Object.assign({}, item), { productPrice: product.price, name: product.name, amount: amount, units: item.units, comments: item.comments }));
             }
             totalAmount = +(totalAmount + body.priceDelivery).toFixed(2);
             const finalTotalAmount = +(totalAmount * (1 - body.discount / 100)).toFixed(2);
@@ -61,24 +61,114 @@ exports.invoicesService = {
     },
     getTotalWeightByBriefcaseId(briefcaseId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const brief = yield db_1.briefcaseCollection.findOne({ id: briefcaseId });
-            const viewResult = new Map();
-            for (const order of brief.orders) {
+            const brief = yield db_1.briefcaseCollection.aggregate([
+                { $match: { id: briefcaseId } },
+                { $unwind: "$orders" },
+                {
+                    $lookup: {
+                        from: "catalog",
+                        let: { productId: "$orders.invoiceOrderItems.productId" },
+                        pipeline: [
+                            { $match: { $expr: { $in: ["$_id", { $map: { input: "$$productId", as: "pid", in: { $toObjectId: "$$pid" } } }] } } },
+                            { $project: { sortValue: 1, view: 1 } }
+                        ],
+                        as: "catalogData"
+                    }
+                },
+                {
+                    $addFields: {
+                        "orders.invoiceOrderItems": {
+                            $map: {
+                                input: "$orders.invoiceOrderItems",
+                                as: "item",
+                                in: {
+                                    $mergeObjects: [
+                                        "$$item",
+                                        {
+                                            sortValue: {
+                                                $ifNull: [
+                                                    {
+                                                        $arrayElemAt: [
+                                                            {
+                                                                $map: {
+                                                                    input: {
+                                                                        $filter: {
+                                                                            input: "$catalogData",
+                                                                            as: "catalogItem",
+                                                                            cond: { $eq: ["$$catalogItem._id", { $toObjectId: "$$item.productId" }] }
+                                                                        }
+                                                                    },
+                                                                    as: "filteredCatalog",
+                                                                    in: "$$filteredCatalog.sortValue"
+                                                                }
+                                                            },
+                                                            0
+                                                        ]
+                                                    },
+                                                    0
+                                                ]
+                                            },
+                                            view: {
+                                                $ifNull: [
+                                                    {
+                                                        $arrayElemAt: [
+                                                            {
+                                                                $map: {
+                                                                    input: {
+                                                                        $filter: {
+                                                                            input: "$catalogData",
+                                                                            as: "catalogItem",
+                                                                            cond: { $eq: ["$$catalogItem._id", { $toObjectId: "$$item.productId" }] }
+                                                                        }
+                                                                    },
+                                                                    as: "filteredCatalog",
+                                                                    in: "$$filteredCatalog.view"
+                                                                }
+                                                            },
+                                                            0
+                                                        ]
+                                                    },
+                                                    null
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        orders: { $push: "$orders" }
+                    }
+                }
+            ]).toArray();
+            const viewData = {};
+            for (const order of brief[0].orders) {
                 if (order.invoiceOrderItems) {
                     for (const item of order.invoiceOrderItems) {
-                        const product = viewResult.get(item.view);
-                        if (product) {
-                            product[item.name] ? product[item.name] += item.weight : product[item.name] = item.weight;
+                        if (!viewData[item.view]) {
+                            viewData[item.view] = {};
                         }
-                        else {
-                            viewResult.set(item.view, { [item.name]: item.weight });
+                        if (!viewData[item.view][item.name]) {
+                            viewData[item.view][item.name] = {
+                                sortValue: item.sortValue || 0,
+                                weight: 0
+                            };
                         }
+                        viewData[item.view][item.name].weight += item.weight;
                     }
                 }
             }
-            return Array.from(viewResult, ([view, products]) => ({
+            return Object.keys(viewData).map(view => ({
                 view,
-                products
+                products: Object.keys(viewData[view]).map(name => ({
+                    name,
+                    sortValue: viewData[view][name].sortValue,
+                    weight: viewData[view][name].weight
+                })).sort((a, b) => a.sortValue - b.sortValue)
             }));
         });
     }
