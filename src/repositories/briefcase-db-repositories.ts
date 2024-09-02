@@ -178,9 +178,9 @@ export const briefcaseRepositories = {
     if (briefcase && newDeliveryRoute) {
       briefcase.orders[orderIndex].deliveryRoute = {_id:body._id, name:body.name};
 
-      const resultDR = await deliveryRoutesCollection.findOneAndUpdate({_id: newDeliveryRoute._id}, {$set: newDeliveryRoute});
+      const resultDR = await deliveryRoutesCollection.updateOne({_id: newDeliveryRoute._id}, {$set: newDeliveryRoute});
 
-      if (resultDR) {
+      if (resultDR && resultDR.modifiedCount != 0 ) {
         return await briefcaseCollection.findOneAndUpdate({id: idBriefcase}, {$set: {orders: briefcase.orders}});
       }
 
