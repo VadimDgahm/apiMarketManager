@@ -65,6 +65,9 @@ exports.invoicesService = {
                 { $match: { id: briefcaseId } },
                 { $unwind: "$orders" },
                 {
+                    $match: { "orders.invoiceOrderItems": { $exists: true, $ne: [] } }
+                },
+                {
                     $lookup: {
                         from: "catalog",
                         let: { productId: "$orders.invoiceOrderItems.productId" },
