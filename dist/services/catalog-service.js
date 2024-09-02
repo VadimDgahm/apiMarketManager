@@ -18,7 +18,7 @@ exports.catalogService = {
             return yield catalog_db_repositories_1.catalogRepositories.getCatalog(userId);
         });
     },
-    createProduct({ name, type, userId, view, reductionName, price }) {
+    createProduct({ name, type, userId, view, reductionName, price, sortValue, }) {
         return __awaiter(this, void 0, void 0, function* () {
             const body = {
                 id: (0, uuid_1.v4)(),
@@ -27,7 +27,8 @@ exports.catalogService = {
                 view,
                 userId,
                 reductionName,
-                price
+                price,
+                sortValue,
             };
             return yield catalog_db_repositories_1.catalogRepositories.createProduct(body);
         });
@@ -41,6 +42,6 @@ exports.catalogService = {
         return __awaiter(this, void 0, void 0, function* () {
             return yield catalog_db_repositories_1.catalogRepositories.changeProduct(productId, userId, body);
         });
-    }
+    },
 };
 //# sourceMappingURL=catalog-service.js.map
