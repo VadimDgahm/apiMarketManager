@@ -140,7 +140,7 @@ exports.briefcaseRepositories = {
                                                                                     }
                                                                                 },
                                                                                 as: "filteredCatalog",
-                                                                                in: "$$filteredCatalog.sortValue" // Берем только значение sortValue
+                                                                                in: "$$filteredCatalog.sortValue"
                                                                             }
                                                                         },
                                                                         0
