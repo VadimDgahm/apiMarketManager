@@ -24,7 +24,7 @@ briefcaseRoute.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
 // @ts-ignore
 briefcaseRoute.get('/purchase/:id', async (req: AuthenticatedRequest, res: Response) => {
     const briefcase = await briefcaseService.getBriefcaseByIdPurchase(req.params.id , req.user.id)
-return briefcase ? 'data' : 'test';
+
     if (briefcase) {
         res.send(briefcase)
     } else {
