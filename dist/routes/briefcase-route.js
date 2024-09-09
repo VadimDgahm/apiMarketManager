@@ -28,6 +28,16 @@ exports.briefcaseRoute.get('/:id', (req, res) => __awaiter(void 0, void 0, void 
         res.status(404).send('not Found');
     }
 }));
+// @ts-ignore
+exports.briefcaseRoute.get('/purchase/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const briefcase = yield briefcase_service_1.briefcaseService.getBriefcaseByIdPurchase(req.params.id, req.user.id);
+    if (briefcase) {
+        res.send(briefcase);
+    }
+    else {
+        res.status(404).send('not Found');
+    }
+}));
 exports.briefcaseRoute.post('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const idBriefcase = req.params.id;
     const body = req.body;
