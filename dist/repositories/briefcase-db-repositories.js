@@ -76,6 +76,103 @@ exports.briefcaseRepositories = {
             return resBrief[0];
         });
     },
+    getBriefcaseByIdPurchase(briefcaseId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const resBrief = yield db_1.briefcaseCollection.aggregate([
+                { $match: { id: briefcaseId, userId } },
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "orders.clientId",
+                        foreignField: "id",
+                        as: "orderClientData"
+                    }
+                },
+                {
+                    $unwind: "$orders"
+                },
+                {
+                    $lookup: {
+                        from: "catalog",
+                        let: { productIds: "$orders.orderClient.productId" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $in: [{ $toObjectId: "$_id" }, { $map: { input: "$$productIds", as: "pid", in: { $toObjectId: "$$pid" } } }]
+                                    }
+                                }
+                            },
+                            { $project: { _id: 0, productId: "$_id", sortValue: 1 } } // Убираем _id, оставляем только productId и sortValue
+                        ],
+                        as: "catalogData"
+                    }
+                },
+                {
+                    $project: {
+                        id: 1,
+                        name: 1,
+                        createdDate: 1,
+                        userId: 1,
+                        orders: {
+                            $mergeObjects: [
+                                "$orders",
+                                {
+                                    orderClient: {
+                                        $map: {
+                                            input: "$orders.orderClient",
+                                            as: "clientProduct",
+                                            in: {
+                                                $mergeObjects: [
+                                                    "$$clientProduct",
+                                                    {
+                                                        sortValue: {
+                                                            $ifNull: [
+                                                                {
+                                                                    $arrayElemAt: [
+                                                                        {
+                                                                            $map: {
+                                                                                input: {
+                                                                                    $filter: {
+                                                                                        input: "$catalogData",
+                                                                                        as: "catalogItem",
+                                                                                        cond: { $eq: ["$$catalogItem.productId", { $toObjectId: "$$clientProduct.productId" }] }
+                                                                                    }
+                                                                                },
+                                                                                as: "filteredCatalog",
+                                                                                in: "$$filteredCatalog.sortValue" // Берем только значение sortValue
+                                                                            }
+                                                                        },
+                                                                        0
+                                                                    ]
+                                                                },
+                                                                0
+                                                            ]
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        orders: { $push: "$orders" },
+                        id: { $first: "$id" },
+                        name: { $first: "$name" },
+                        createdDate: { $first: "$createdDate" },
+                        userId: { $first: "$userId" }
+                    }
+                }
+            ]).toArray();
+            return resBrief[0];
+        });
+    },
     createBriefcase(order) {
         return __awaiter(this, void 0, void 0, function* () {
             yield db_1.briefcaseCollection.insertOne(order);

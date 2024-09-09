@@ -31,6 +31,11 @@ exports.briefcaseService = {
             return yield briefcase_db_repositories_1.briefcaseRepositories.getBriefcaseById(briefcaseId, userId);
         });
     },
+    getBriefcaseByIdPurchase(briefcaseId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield briefcase_db_repositories_1.briefcaseRepositories.getBriefcaseByIdPurchase(briefcaseId, userId);
+        });
+    },
     createBriefcase({ name }, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const body = {

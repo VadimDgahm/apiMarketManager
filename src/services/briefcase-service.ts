@@ -19,7 +19,10 @@ export const briefcaseService = {
     // },
     async getBriefcaseById(briefcaseId: string, userId: string) {
         return await briefcaseRepositories.getBriefcaseById(briefcaseId, userId);
-      },
+    },
+    async getBriefcaseByIdPurchase(briefcaseId: string, userId: string) {
+      return await briefcaseRepositories.getBriefcaseByIdPurchase(briefcaseId, userId);
+    },
     async createBriefcase({name}:RequestCreateBriefcase, userId: string) {
         const body: BriefcaseType = {
             id: v4(),

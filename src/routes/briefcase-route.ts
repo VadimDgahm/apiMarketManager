@@ -20,6 +20,17 @@ briefcaseRoute.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
         res.status(404).send('not Found')
     }
 })
+
+// @ts-ignore
+briefcaseRoute.get('/purchase/:id', async (req: AuthenticatedRequest, res: Response) => {
+    const briefcase = await briefcaseService.getBriefcaseByIdPurchase(req.params.id , req.user.id)
+
+    if (briefcase) {
+        res.send(briefcase)
+    } else {
+        res.status(404).send('not Found')
+    }
+})
 briefcaseRoute.post('/:id', async (req: Request, res: Response) => {
 
     const idBriefcase = req.params.id
