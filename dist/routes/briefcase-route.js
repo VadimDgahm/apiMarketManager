@@ -31,6 +31,7 @@ exports.briefcaseRoute.get('/:id', (req, res) => __awaiter(void 0, void 0, void 
 // @ts-ignore
 exports.briefcaseRoute.get('/purchase/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const briefcase = yield briefcase_service_1.briefcaseService.getBriefcaseByIdPurchase(req.params.id, req.user.id);
+    return briefcase ? 'data' : 'test';
     if (briefcase) {
         res.send(briefcase);
     }
