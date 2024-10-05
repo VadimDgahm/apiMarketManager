@@ -376,7 +376,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
             const productPriceCell = discount ? productPrice.toFixed(2) + ` (${discount}%)` : productPrice.toFixed(2);
 
             if(productPrice === 0) {
-                fullTotals.gifts += profit;
+                fullTotals.gifts += +profit.toFixed(2);
             }
 
             const row = worksheet.addRow([

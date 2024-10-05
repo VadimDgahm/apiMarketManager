@@ -366,7 +366,7 @@ function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
                 const profit = salesSum - purchaseSum;
                 const productPriceCell = discount ? productPrice.toFixed(2) + ` (${discount}%)` : productPrice.toFixed(2);
                 if (productPrice === 0) {
-                    fullTotals.gifts += profit;
+                    fullTotals.gifts += +profit.toFixed(2);
                 }
                 const row = worksheet.addRow([
                     index + 1,
