@@ -30,6 +30,7 @@ const address_route_1 = require("./routes/address-route");
 const phone_route_1 = require("./routes/phone-route");
 const invoices_route_1 = require("./routes/invoices-route");
 const deliveryRoutes_route_1 = require("./routes/deliveryRoutes-route");
+const privateReport_route_1 = require("./routes/privateReport-route");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
@@ -61,6 +62,8 @@ app.use('/phone', auth_middleware_1.authMiddleware, phone_route_1.phoneRoute);
 app.use('/deliveryRoute', auth_middleware_1.authMiddleware, deliveryRoutes_route_1.deliveryRoutesRoute);
 // @ts-ignore
 app.use('/invoices', auth_middleware_1.authMiddleware, invoices_route_1.invoicesRoute);
+// @ts-ignore
+app.use('/private-report', auth_middleware_1.authMiddleware, privateReport_route_1.privateReportRoute);
 app.use(error_middleware_1.default);
 const startApp = () => __awaiter(void 0, void 0, void 0, function* () {
     yield (0, db_1.runDb)();

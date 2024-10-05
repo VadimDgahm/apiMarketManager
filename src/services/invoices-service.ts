@@ -213,7 +213,8 @@ export type OrderItemsResponse = {
   amount: number;
   name: string;
   view?: string;
-  sortValue?: number
+  sortValue?: number;
+  purchasePrice?: number;
 
 } & OrderItemsRequest;
 

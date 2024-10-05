@@ -16,6 +16,7 @@ import { addressRoute } from "./routes/address-route";
 import { phoneRoute } from "./routes/phone-route";
 import { invoicesRoute } from "./routes/invoices-route";
 import {deliveryRoutesRoute} from "./routes/deliveryRoutes-route";
+import {privateReportRoute} from "./routes/privateReport-route";
 
 
 dotenv.config()
@@ -56,6 +57,8 @@ app.use('/phone',authMiddleware, phoneRoute)
 app.use('/deliveryRoute',authMiddleware, deliveryRoutesRoute)
 // @ts-ignore
 app.use('/invoices',authMiddleware, invoicesRoute)
+// @ts-ignore
+app.use('/private-report',authMiddleware, privateReportRoute)
 app.use(errorMiddleware)
 
 

@@ -78,5 +78,6 @@ export type UserType = {
     activationLink: string,
     email: string,
     password: string
-    isActivated: boolean
+    isActivated: boolean,
+    privatePass?: string
 }
