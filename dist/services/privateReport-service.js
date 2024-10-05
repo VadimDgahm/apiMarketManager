@@ -144,7 +144,7 @@ exports.privateReportService = {
                                                             0
                                                         ]
                                                     },
-                                                    null
+                                                    0
                                                 ]
                                             }
                                         }
