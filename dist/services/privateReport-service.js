@@ -34,6 +34,7 @@ exports.privateReportService = {
             const workbook = new exceljs_1.default.Workbook();
             yield generateWorksheet(data.data, workbook, 'Продажи');
             yield generateWorksheet(data.giftData, workbook, 'Подарки');
+            yield generateWorksheet(data.discountData, workbook, 'Скидки');
             return workbook;
         });
     },
@@ -163,7 +164,11 @@ exports.privateReportService = {
             ]).toArray();
             const viewData = {};
             const giftViewData = {};
-            const addData = (data, item) => {
+            const discountData = {};
+            const addData = (data, item, config = {
+                discount: 0,
+                isGift: false
+            }) => {
                 if (!data[item.view]) {
                     data[item.view] = {};
                 }
@@ -174,6 +179,12 @@ exports.privateReportService = {
                         purchasePrice: item.purchasePrice,
                         productPrice: item.productPrice
                     };
+                    if (config.isGift) {
+                        data[item.view][item.name].productPrice = 0;
+                    }
+                    if (config.discount) {
+                        data[item.view][item.name].discount = config.discount;
+                    }
                 }
                 data[item.view][item.name].weight += item.weight;
             };
@@ -181,7 +192,10 @@ exports.privateReportService = {
                 if (order.invoiceOrderItems) {
                     for (const item of order.invoiceOrderItems) {
                         if (item.isGift) {
-                            addData(giftViewData, item);
+                            addData(giftViewData, item, { isGift: true });
+                        }
+                        else if (order.discount) {
+                            addData(discountData, item, { discount: order.discount });
                         }
                         else {
                             addData(viewData, item);
@@ -192,18 +206,60 @@ exports.privateReportService = {
             const parseData = (data) => {
                 return Object.keys(data).map(view => ({
                     view,
-                    products: Object.keys(data[view]).map(name => ({
-                        name,
-                        sortValue: data[view][name].sortValue,
-                        weight: data[view][name].weight,
-                        purchasePrice: data[view][name].purchasePrice,
-                        productPrice: data[view][name].productPrice
-                    })).sort((a, b) => a.sortValue - b.sortValue)
+                    products: Object.keys(data[view]).map(name => {
+                        var _a;
+                        return ({
+                            name,
+                            sortValue: data[view][name].sortValue,
+                            weight: data[view][name].weight,
+                            purchasePrice: data[view][name].purchasePrice,
+                            productPrice: data[view][name].productPrice,
+                            discount: (_a = data[view][name].discount) !== null && _a !== void 0 ? _a : 0
+                        });
+                    }).sort((a, b) => a.sortValue - b.sortValue)
                 }));
             };
+            const parseData2 = (data, gift, discountData) => {
+                return Object.keys(data).map(view => {
+                    const res = {
+                        view,
+                        products: Object.keys(data[view]).map(name => ({
+                            name,
+                            sortValue: data[view][name].sortValue,
+                            weight: data[view][name].weight,
+                            purchasePrice: data[view][name].purchasePrice,
+                            productPrice: data[view][name].productPrice
+                        })).sort((a, b) => a.sortValue - b.sortValue)
+                    };
+                    if (discountData[view]) {
+                        res.products.push(...Object.keys(discountData[view]).map(name => {
+                            var _a;
+                            return ({
+                                name,
+                                sortValue: discountData[view][name].sortValue,
+                                weight: discountData[view][name].weight,
+                                purchasePrice: discountData[view][name].purchasePrice,
+                                productPrice: discountData[view][name].productPrice,
+                                discount: (_a = discountData[view][name].discount) !== null && _a !== void 0 ? _a : 0
+                            });
+                        }));
+                    }
+                    if (gift[view]) {
+                        res.products.push(...Object.keys(gift[view]).map(name => ({
+                            name,
+                            sortValue: gift[view][name].sortValue,
+                            weight: gift[view][name].weight,
+                            purchasePrice: gift[view][name].purchasePrice,
+                            productPrice: gift[view][name].productPrice
+                        })));
+                    }
+                    return res;
+                });
+            };
             return {
-                data: parseData(viewData),
-                giftData: parseData(giftViewData)
+                data: parseData2(viewData, giftViewData, discountData),
+                giftData: parseData(giftViewData),
+                discountData: parseData(discountData)
             };
         });
     }
@@ -238,7 +294,7 @@ function generateWorksheet(data, workbook, nameWorksheet) {
                 'Позиция',
                 'Вес, кг',
                 'Цена закупки',
-                'Сумма закупа',
+                'Сумма закупки',
                 'Цена продажи',
                 'Сумма продажи',
                 'Наценка, руб.',
@@ -268,26 +324,50 @@ function generateWorksheet(data, workbook, nameWorksheet) {
             let totalSales = 0;
             let totalProfit = 0;
             products.forEach((product, index) => {
-                const { name, weight, purchasePrice, productPrice } = product;
+                const { name, weight, purchasePrice, discount } = product;
+                if (discount) {
+                    product.productPrice *= (100 - discount) / 100;
+                }
+                const productPrice = product.productPrice;
                 const purchaseSum = weight * purchasePrice;
                 const salesSum = weight * productPrice;
-                const markupValue = productPrice - purchasePrice;
-                const markupPercent = (markupValue / purchasePrice) * 100;
+                const markupValue = productPrice === 0 ? 0 : productPrice - purchasePrice;
+                const markupPercent = productPrice === 0 ? 0 : (markupValue / purchasePrice) * 100;
                 const profit = salesSum - purchaseSum;
-                worksheet.addRow([
+                const productPriceCell = discount ? productPrice.toFixed(2) + ` (${discount}%)` : productPrice.toFixed(2);
+                const row = worksheet.addRow([
                     index + 1,
                     name,
                     weight.toFixed(2),
                     purchasePrice.toFixed(2),
                     purchaseSum.toFixed(2),
-                    productPrice.toFixed(2),
+                    productPriceCell,
                     salesSum.toFixed(2),
                     markupValue.toFixed(2),
                     markupPercent.toFixed(2),
                     profit.toFixed(2)
-                ]).eachCell(cell => {
-                    // @ts-ignore
-                    cell.style = rowStyle;
+                ]);
+                row.eachCell((cell, colNumber) => {
+                    if (productPrice === 0) {
+                        // @ts-ignore
+                        cell.style = Object.assign(Object.assign({}, rowStyle), { fill: {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'ffc0c0' },
+                            } });
+                    }
+                    else if (discount) {
+                        // @ts-ignore
+                        cell.style = Object.assign(Object.assign({}, rowStyle), { fill: {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'b4c7dc' },
+                            } });
+                    }
+                    else {
+                        // @ts-ignore
+                        cell.style = rowStyle;
+                    }
                 });
                 totalWeight += weight;
                 totalPurchase += purchaseSum;

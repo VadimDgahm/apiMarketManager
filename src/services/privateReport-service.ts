@@ -22,6 +22,7 @@ export const privateReportService = {
 
         await generateWorksheet(data.data, workbook, 'Продажи');
         await generateWorksheet(data.giftData, workbook, 'Подарки');
+        await generateWorksheet(data.discountData, workbook, 'Скидки');
 
         return workbook;
     },
@@ -152,8 +153,13 @@ export const privateReportService = {
 
         const viewData: ViewDataMap = {};
         const giftViewData: ViewDataMap = {};
+        const discountData: ViewDataMap = {};
 
-        const addData = (data: ViewDataMap, item: OrderItemsResponse) => {
+
+        const addData = (data: ViewDataMap, item: OrderItemsResponse, config: Config = {
+            discount: 0,
+            isGift: false
+        }) => {
             if (!data[item.view]) {
                 data[item.view] = {};
             }
@@ -165,6 +171,14 @@ export const privateReportService = {
                     purchasePrice: item.purchasePrice,
                     productPrice: item.productPrice
                 };
+
+                if (config.isGift) {
+                    data[item.view][item.name].productPrice = 0;
+                }
+
+                if (config.discount) {
+                    data[item.view][item.name].discount = config.discount;
+                }
             }
 
             data[item.view][item.name].weight += item.weight;
@@ -174,7 +188,9 @@ export const privateReportService = {
             if (order.invoiceOrderItems) {
                 for (const item of order.invoiceOrderItems) {
                     if (item.isGift) {
-                        addData(giftViewData, item);
+                        addData(giftViewData, item, {isGift: true});
+                    } else if (order.discount) {
+                        addData(discountData, item, {discount: order.discount});
                     } else {
                         addData(viewData, item);
                     }
@@ -190,14 +206,54 @@ export const privateReportService = {
                     sortValue: data[view][name].sortValue,
                     weight: data[view][name].weight,
                     purchasePrice: data[view][name].purchasePrice,
-                    productPrice: data[view][name].productPrice
+                    productPrice: data[view][name].productPrice,
+                    discount: data[view][name].discount ?? 0
                 })).sort((a, b) => a.sortValue - b.sortValue)
             }))
         }
 
+        const parseData2 = (data: ViewDataMap, gift: ViewDataMap, discountData: ViewDataMap) => {
+            return Object.keys(data).map(view => {
+                const res = {
+                    view,
+                    products: Object.keys(data[view]).map(name => ({
+                        name,
+                        sortValue: data[view][name].sortValue,
+                        weight: data[view][name].weight,
+                        purchasePrice: data[view][name].purchasePrice,
+                        productPrice: data[view][name].productPrice
+                    })).sort((a, b) => a.sortValue - b.sortValue)
+                }
+
+                if (discountData[view]) {
+                    res.products.push(...Object.keys(discountData[view]).map(name => ({
+                        name,
+                        sortValue: discountData[view][name].sortValue,
+                        weight: discountData[view][name].weight,
+                        purchasePrice: discountData[view][name].purchasePrice,
+                        productPrice: discountData[view][name].productPrice,
+                        discount: discountData[view][name].discount ?? 0
+                    })));
+                }
+
+                if (gift[view]) {
+                    res.products.push(...Object.keys(gift[view]).map(name => ({
+                        name,
+                        sortValue: gift[view][name].sortValue,
+                        weight: gift[view][name].weight,
+                        purchasePrice: gift[view][name].purchasePrice,
+                        productPrice: gift[view][name].productPrice
+                    })));
+                }
+
+                return res;
+            })
+        }
+
         return {
-            data: parseData(viewData),
-            giftData: parseData(giftViewData)
+            data: parseData2(viewData, giftViewData, discountData),
+            giftData: parseData(giftViewData),
+            discountData: parseData(discountData)
         };
     }
 };
@@ -237,7 +293,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
             'Позиция',
             'Вес, кг',
             'Цена закупки',
-            'Сумма закупа',
+            'Сумма закупки',
             'Цена продажи',
             'Сумма продажи',
             'Наценка, руб.',
@@ -273,27 +329,57 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
         let totalProfit = 0;
 
         products.forEach((product, index) => {
-            const {name, weight, purchasePrice, productPrice} = product;
+            const {name, weight, purchasePrice, discount} = product;
+            if (discount) {
+                product.productPrice *= (100 - discount) / 100;
+            }
+            const productPrice = product.productPrice;
             const purchaseSum = weight * purchasePrice;
             const salesSum = weight * productPrice;
-            const markupValue = productPrice - purchasePrice;
-            const markupPercent = (markupValue / purchasePrice) * 100;
+            const markupValue = productPrice === 0 ? 0 : productPrice - purchasePrice;
+            const markupPercent = productPrice === 0 ? 0 : (markupValue / purchasePrice) * 100;
             const profit = salesSum - purchaseSum;
 
-            worksheet.addRow([
+            const productPriceCell = discount ? productPrice.toFixed(2) + ` (${discount}%)` : productPrice.toFixed(2);
+
+            const row = worksheet.addRow([
                 index + 1,
                 name,
                 weight.toFixed(2),
                 purchasePrice.toFixed(2),
                 purchaseSum.toFixed(2),
-                productPrice.toFixed(2),
+                productPriceCell,
                 salesSum.toFixed(2),
                 markupValue.toFixed(2),
                 markupPercent.toFixed(2),
                 profit.toFixed(2)
-            ]).eachCell(cell => {
-                // @ts-ignore
-                cell.style = rowStyle;
+            ]);
+
+            row.eachCell((cell, colNumber) => {
+                if (productPrice === 0) {
+                    // @ts-ignore
+                    cell.style = {
+                        ...rowStyle,
+                        fill: {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: {argb: 'ffc0c0'},
+                        }
+                    };
+                } else if (discount) {
+                    // @ts-ignore
+                    cell.style = {
+                        ...rowStyle,
+                        fill: {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: {argb: 'b4c7dc'},
+                        }
+                    };
+                } else {
+                    // @ts-ignore
+                    cell.style = rowStyle;
+                }
             });
 
             totalWeight += weight;
@@ -302,7 +388,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
             totalProfit += profit;
         });
 
-        worksheet.addRow(['','','','','','','','','','']).eachCell(cell => {
+        worksheet.addRow(['', '', '', '', '', '', '', '', '', '']).eachCell(cell => {
             // @ts-ignore
             cell.style = rowStyle;
         });
@@ -320,13 +406,18 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
             totalProfit.toFixed(2)
         ]).eachCell((cell, colNumber) => {
             // @ts-ignore
-            cell.style = {font: {bold: true}, alignment: rowStyle.alignment, border:border};
+            cell.style = {font: {bold: true}, alignment: rowStyle.alignment, border: border};
         });
 
         worksheet.addRow([]);
         worksheet.addRow([]);
         worksheet.addRow([]);
     });
+}
+
+interface Config {
+    discount?: number;
+    isGift?: boolean;
 }
 
 interface dataExel {
@@ -340,6 +431,7 @@ interface ProductData {
     weight: number;
     purchasePrice: number;
     productPrice: number;
+    discount?: number;
 }
 
 interface ViewData {
