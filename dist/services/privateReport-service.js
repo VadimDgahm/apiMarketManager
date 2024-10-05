@@ -265,14 +265,14 @@ function generateWorksheet(data, workbook, nameWorksheet) {
                 worksheet.addRow([
                     index + 1,
                     name,
-                    weight,
-                    purchasePrice,
-                    purchaseSum,
-                    productPrice,
-                    salesSum,
-                    markupValue,
+                    weight.toFixed(2),
+                    purchasePrice.toFixed(2),
+                    purchaseSum.toFixed(2),
+                    productPrice.toFixed(2),
+                    salesSum.toFixed(2),
+                    markupValue.toFixed(2),
                     markupPercent.toFixed(2),
-                    profit
+                    profit.toFixed(2)
                 ]).eachCell(cell => {
                     // @ts-ignore
                     cell.style = rowStyle;
@@ -286,14 +286,14 @@ function generateWorksheet(data, workbook, nameWorksheet) {
             worksheet.addRow([
                 'Итого',
                 '',
-                totalWeight,
+                totalWeight.toFixed(2),
                 '',
-                totalPurchase,
+                totalPurchase.toFixed(2),
                 '',
-                totalSales,
+                totalSales.toFixed(2),
                 '',
                 view + ': ',
-                totalProfit
+                totalProfit.toFixed(2)
             ]).eachCell((cell, colNumber) => {
                 // @ts-ignore
                 cell.style = { font: { bold: true }, alignment: rowStyle.alignment };
