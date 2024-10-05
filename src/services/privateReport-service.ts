@@ -202,16 +202,29 @@ export const privateReportService = {
     }
 };
 
-async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook,nameWorksheet: string) {
+async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, nameWorksheet: string) {
     const worksheet = workbook.addWorksheet(nameWorksheet);
+
+    const border = {
+        top: {style: 'thin'},
+        left: {style: 'thin'},
+        bottom: {style: 'thin'},
+        right: {style: 'thin'},
+    };
 
     const headerStyle = {
         font: {bold: true},
-        alignment: {horizontal: 'center', wrapText: true, vertical: 'middle'}
+        alignment: {
+            horizontal: 'center',
+            wrapText: true,
+            vertical: 'middle',
+        },
+        border: border
     };
 
     const rowStyle = {
-        alignment: {vertical: 'middle', horizontal: 'center'}
+        alignment: {vertical: 'middle', horizontal: 'center'},
+        border: border
     };
 
     data.forEach((viewData, viewIndex) => {
@@ -289,7 +302,10 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook,na
             totalProfit += profit;
         });
 
-        worksheet.addRow([]);
+        worksheet.addRow(['','','','','','','','','','']).eachCell(cell => {
+            // @ts-ignore
+            cell.style = rowStyle;
+        });
 
         worksheet.addRow([
             'Итого',
@@ -304,7 +320,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook,na
             totalProfit.toFixed(2)
         ]).eachCell((cell, colNumber) => {
             // @ts-ignore
-            cell.style = {font: {bold: true}, alignment: rowStyle.alignment};
+            cell.style = {font: {bold: true}, alignment: rowStyle.alignment, border:border};
         });
 
         worksheet.addRow([]);

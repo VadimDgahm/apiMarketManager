@@ -211,12 +211,24 @@ exports.privateReportService = {
 function generateWorksheet(data, workbook, nameWorksheet) {
     return __awaiter(this, void 0, void 0, function* () {
         const worksheet = workbook.addWorksheet(nameWorksheet);
+        const border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+        };
         const headerStyle = {
             font: { bold: true },
-            alignment: { horizontal: 'center', wrapText: true, vertical: 'middle' }
+            alignment: {
+                horizontal: 'center',
+                wrapText: true,
+                vertical: 'middle',
+            },
+            border: border
         };
         const rowStyle = {
-            alignment: { vertical: 'middle', horizontal: 'center' }
+            alignment: { vertical: 'middle', horizontal: 'center' },
+            border: border
         };
         data.forEach((viewData, viewIndex) => {
             const { view, products } = viewData;
@@ -282,7 +294,10 @@ function generateWorksheet(data, workbook, nameWorksheet) {
                 totalSales += salesSum;
                 totalProfit += profit;
             });
-            worksheet.addRow([]);
+            worksheet.addRow(['', '', '', '', '', '', '', '', '', '']).eachCell(cell => {
+                // @ts-ignore
+                cell.style = rowStyle;
+            });
             worksheet.addRow([
                 'Итого',
                 '',
@@ -296,7 +311,7 @@ function generateWorksheet(data, workbook, nameWorksheet) {
                 totalProfit.toFixed(2)
             ]).eachCell((cell, colNumber) => {
                 // @ts-ignore
-                cell.style = { font: { bold: true }, alignment: rowStyle.alignment };
+                cell.style = { font: { bold: true }, alignment: rowStyle.alignment, border: border };
             });
             worksheet.addRow([]);
             worksheet.addRow([]);
