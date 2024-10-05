@@ -32,7 +32,7 @@ exports.privateReportService = {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.getTotalWeightByBriefcaseId(idBriefcase);
             const workbook = new exceljs_1.default.Workbook();
-            yield generateWorksheet(data.data, workbook, 'Продажи');
+            yield generateWorksheet(data.data, workbook, 'Продажи', data.totalDelivery);
             yield generateWorksheet(data.giftData, workbook, 'Подарки');
             yield generateWorksheet(data.discountData, workbook, 'Скидки');
             return workbook;
@@ -165,6 +165,7 @@ exports.privateReportService = {
             const viewData = {};
             const giftViewData = {};
             const discountData = {};
+            const totalDelivery = { amount: 0 };
             const addData = (data, item, config = {
                 discount: 0,
                 isGift: false
@@ -201,6 +202,14 @@ exports.privateReportService = {
                             addData(viewData, item);
                         }
                     }
+                    if (order.priceDelivery) {
+                        if (order.discount) {
+                            totalDelivery.amount += +(order.priceDelivery * ((100 - order.discount) / 100)).toFixed(2);
+                        }
+                        else {
+                            totalDelivery.amount += +order.priceDelivery;
+                        }
+                    }
                 }
             }
             const parseData = (data) => {
@@ -219,7 +228,7 @@ exports.privateReportService = {
                     }).sort((a, b) => a.sortValue - b.sortValue)
                 }));
             };
-            const parseData2 = (data, gift, discountData) => {
+            const parseData3 = (data, gift, discountData) => {
                 return Object.keys(data).map(view => {
                     const res = {
                         view,
@@ -257,14 +266,15 @@ exports.privateReportService = {
                 });
             };
             return {
-                data: parseData2(viewData, giftViewData, discountData),
+                data: parseData3(viewData, giftViewData, discountData),
                 giftData: parseData(giftViewData),
-                discountData: parseData(discountData)
+                discountData: parseData(discountData),
+                totalDelivery: totalDelivery.amount
             };
         });
     }
 };
-function generateWorksheet(data, workbook, nameWorksheet) {
+function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
     return __awaiter(this, void 0, void 0, function* () {
         const worksheet = workbook.addWorksheet(nameWorksheet);
         const border = {
@@ -286,9 +296,28 @@ function generateWorksheet(data, workbook, nameWorksheet) {
             alignment: { vertical: 'middle', horizontal: 'center' },
             border: border
         };
+        const fullTotals = {
+            purchases: 0,
+            sales: 0,
+            profit: 0,
+            markupPercent: 0,
+            gifts: 0
+        };
         data.forEach((viewData, viewIndex) => {
             const { view, products } = viewData;
-            worksheet.addRow([view]).font = { bold: true };
+            const titleRow = worksheet.addRow([view]);
+            titleRow.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
+            titleRow.alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            };
+            titleRow.getCell(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '51382f' }
+            };
+            const rowNumber = titleRow.number;
+            worksheet.mergeCells(`${'A' + rowNumber}:${'J' + rowNumber}`);
             const headers = [
                 '№',
                 'Позиция',
@@ -323,6 +352,7 @@ function generateWorksheet(data, workbook, nameWorksheet) {
             let totalPurchase = 0;
             let totalSales = 0;
             let totalProfit = 0;
+            let totalMarkupPercent = 0;
             products.forEach((product, index) => {
                 const { name, weight, purchasePrice, discount } = product;
                 if (discount) {
@@ -335,6 +365,9 @@ function generateWorksheet(data, workbook, nameWorksheet) {
                 const markupPercent = productPrice === 0 ? 0 : (markupValue / purchasePrice) * 100;
                 const profit = salesSum - purchaseSum;
                 const productPriceCell = discount ? productPrice.toFixed(2) + ` (${discount}%)` : productPrice.toFixed(2);
+                if (productPrice === 0) {
+                    fullTotals.gifts += profit;
+                }
                 const row = worksheet.addRow([
                     index + 1,
                     name,
@@ -370,11 +403,16 @@ function generateWorksheet(data, workbook, nameWorksheet) {
                     }
                 });
                 totalWeight += weight;
-                totalPurchase += purchaseSum;
-                totalSales += salesSum;
-                totalProfit += profit;
+                totalPurchase += +purchaseSum.toFixed(2);
+                totalSales += +salesSum.toFixed(2);
+                totalProfit += +profit.toFixed(2);
+                totalMarkupPercent += +markupPercent.toFixed(2);
             });
-            worksheet.addRow(['', '', '', '', '', '', '', '', '', '']).eachCell(cell => {
+            fullTotals.markupPercent += totalMarkupPercent;
+            fullTotals.purchases += totalPurchase;
+            fullTotals.sales += totalSales;
+            fullTotals.profit += totalProfit;
+            worksheet.addRow(['', '', '', '', '', '', '', '', '', view]).eachCell(cell => {
                 // @ts-ignore
                 cell.style = rowStyle;
             });
@@ -387,7 +425,7 @@ function generateWorksheet(data, workbook, nameWorksheet) {
                 '',
                 totalSales.toFixed(2),
                 '',
-                view + ': ',
+                totalMarkupPercent.toFixed(2),
                 totalProfit.toFixed(2)
             ]).eachCell((cell, colNumber) => {
                 // @ts-ignore
@@ -397,6 +435,14 @@ function generateWorksheet(data, workbook, nameWorksheet) {
             worksheet.addRow([]);
             worksheet.addRow([]);
         });
+        worksheet.addRow(['', 'Общая закупка, руб: ', fullTotals.purchases]);
+        worksheet.addRow(['', 'Общая продажа, руб: ', fullTotals.sales]);
+        worksheet.addRow(['', 'Общая наценка, %: ', fullTotals.markupPercent]);
+        worksheet.addRow(['', 'Сумма подарков, руб: ', fullTotals.gifts]);
+        worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit]);
+        worksheet.addRow([]);
+        worksheet.addRow(['', 'Сумма за доставку, руб.: ', totaldelivery]);
+        worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit + totaldelivery]);
     });
 }
 //# sourceMappingURL=privateReport-service.js.map
