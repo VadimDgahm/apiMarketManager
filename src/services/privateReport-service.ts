@@ -298,6 +298,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
         sales: 0,
         profit: 0,
         markupPercent: 0,
+        markupPercentWithAction: 0,
         gifts: 0
     };
 
@@ -360,11 +361,14 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
         let totalSales = 0;
         let totalProfit = 0;
         let totalMarkupPercent = 0;
+        let countPromotions = 0;
+        let totalMarkupPercentWithAction = 0;
 
         products.forEach((product, index) => {
             const {name, weight, purchasePrice, discount} = product;
             if (discount) {
                 product.productPrice *= (100 - discount) / 100;
+                countPromotions++
             }
             const productPrice = product.productPrice;
             const purchaseSum = weight * purchasePrice;
@@ -377,6 +381,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
 
             if(productPrice === 0) {
                 fullTotals.gifts += +profit.toFixed(2);
+                countPromotions++;
             }
 
             const row = worksheet.addRow([
@@ -423,16 +428,19 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
             totalPurchase += +purchaseSum.toFixed(2);
             totalSales += +salesSum.toFixed(2);
             totalProfit += +profit.toFixed(2);
-            totalMarkupPercent += +markupPercent.toFixed(2);
+            totalMarkupPercent += discount ? 0 : +markupPercent.toFixed(2);
+            totalMarkupPercentWithAction += +markupPercent.toFixed(2);
         });
 
-        totalMarkupPercent = +(totalMarkupPercent /  products.length).toFixed(2);
+        totalMarkupPercent = +(totalMarkupPercent /  (products.length - countPromotions)).toFixed(2);
+        totalMarkupPercentWithAction = +(totalMarkupPercentWithAction / products.length).toFixed(2)
         fullTotals.markupPercent += totalMarkupPercent;
+        fullTotals.markupPercentWithAction += totalMarkupPercentWithAction;
         fullTotals.purchases += totalPurchase;
         fullTotals.sales +=  totalSales;
         fullTotals.profit += totalProfit;
 
-        worksheet.addRow(['', '', '', '', '', '', '', '', '', view]).eachCell(cell => {
+        worksheet.addRow(['', '', '', '', '', '', '', '', totalMarkupPercentWithAction + '(A)', view]).eachCell(cell => {
             // @ts-ignore
             cell.style = rowStyle;
         });
@@ -460,7 +468,9 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
 
     worksheet.addRow(['', 'Общая закупка, руб: ', fullTotals.purchases]);
     worksheet.addRow(['', 'Общая продажа, руб: ', fullTotals.sales]);
-    worksheet.addRow(['', 'Общая наценка, %: ', fullTotals.markupPercent]);
+    worksheet.addRow(['', 'Общая наценка, %: ', +(fullTotals.markupPercent / data.length).toFixed(2)]);
+    worksheet.addRow(['', 'Общая наценка (акции), %: ', +(fullTotals.markupPercentWithAction / data.length).toFixed(2)]);
+
     worksheet.addRow(['', 'Сумма подарков, руб: ', fullTotals.gifts]);
     worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit]);
     worksheet.addRow([]);
