@@ -421,7 +421,7 @@ function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
             fullTotals.purchases += totalPurchase;
             fullTotals.sales += totalSales;
             fullTotals.profit += totalProfit;
-            worksheet.addRow(['', '', '', '', '', '', '', '', totalMarkupPercentWithAction + '(A)', view]).eachCell(cell => {
+            worksheet.addRow(['', '', '', '', '', '', '', '', totalMarkupPercentWithAction + ' (A)', view]).eachCell(cell => {
                 // @ts-ignore
                 cell.style = rowStyle;
             });

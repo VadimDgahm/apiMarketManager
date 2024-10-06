@@ -440,7 +440,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
         fullTotals.sales +=  totalSales;
         fullTotals.profit += totalProfit;
 
-        worksheet.addRow(['', '', '', '', '', '', '', '', totalMarkupPercentWithAction + '(A)', view]).eachCell(cell => {
+        worksheet.addRow(['', '', '', '', '', '', '', '', totalMarkupPercentWithAction + ' (A)', view]).eachCell(cell => {
             // @ts-ignore
             cell.style = rowStyle;
         });
