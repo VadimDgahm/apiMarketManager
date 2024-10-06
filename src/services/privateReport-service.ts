@@ -426,6 +426,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
             totalMarkupPercent += +markupPercent.toFixed(2);
         });
 
+        totalMarkupPercent = +(totalMarkupPercent /  products.length).toFixed(2);
         fullTotals.markupPercent += totalMarkupPercent;
         fullTotals.purchases += totalPurchase;
         fullTotals.sales +=  totalSales;

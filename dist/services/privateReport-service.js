@@ -408,6 +408,7 @@ function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
                 totalProfit += +profit.toFixed(2);
                 totalMarkupPercent += +markupPercent.toFixed(2);
             });
+            totalMarkupPercent = +(totalMarkupPercent / products.length).toFixed(2);
             fullTotals.markupPercent += totalMarkupPercent;
             fullTotals.purchases += totalPurchase;
             fullTotals.sales += totalSales;
