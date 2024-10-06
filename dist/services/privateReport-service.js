@@ -339,7 +339,7 @@ function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
             worksheet.columns = [
                 { width: 10 }, // Ширина для "№"
                 { width: 30 }, // Ширина для "Позиция (name)"
-                { width: 8 }, // Ширина для "Вес, кг"
+                { width: 9 }, // Ширина для "Вес, кг"
                 { width: 13 }, // Ширина для "Цена закупки"
                 { width: 13 }, // Ширина для "Сумма закупа"
                 { width: 13 }, // Ширина для "Цена продажи"

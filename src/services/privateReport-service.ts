@@ -345,7 +345,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
         worksheet.columns = [
             {width: 10},  // Ширина для "№"
             {width: 30}, // Ширина для "Позиция (name)"
-            {width: 8}, // Ширина для "Вес, кг"
+            {width: 9}, // Ширина для "Вес, кг"
             {width: 13}, // Ширина для "Цена закупки"
             {width: 13}, // Ширина для "Сумма закупа"
             {width: 13}, // Ширина для "Цена продажи"
