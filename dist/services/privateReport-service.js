@@ -16,7 +16,7 @@ exports.privateReportService = void 0;
 const users_db_repositories_1 = require("../repositories/users-db-repositories");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const exceljs_1 = __importDefault(require("exceljs"));
-const db_1 = require("../repositories/db");
+const privateReport_db_repositories_1 = require("../repositories/privateReport-db-repositories");
 exports.privateReportService = {
     checkPrivatePass(userId, password) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -28,9 +28,9 @@ exports.privateReportService = {
             return isPassEquals ? { success: true } : { success: false };
         });
     },
-    createPrivateReport(userId, idBriefcase) {
+    createPrivateReport(userId, idBriefcase, deliveryRoutes) {
         return __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.getTotalWeightByBriefcaseId(idBriefcase);
+            const data = yield this.getTotalWeightByBriefcaseId(idBriefcase, deliveryRoutes);
             const workbook = new exceljs_1.default.Workbook();
             yield generateWorksheet(data.data, workbook, 'Продажи', data.totalDelivery);
             yield generateWorksheet(data.giftData, workbook, 'Подарки');
@@ -38,130 +38,9 @@ exports.privateReportService = {
             return workbook;
         });
     },
-    getTotalWeightByBriefcaseId(briefcaseId) {
+    getTotalWeightByBriefcaseId(briefcaseId, deliveryRoutes) {
         return __awaiter(this, void 0, void 0, function* () {
-            const brief = yield db_1.briefcaseCollection.aggregate([
-                { $match: { id: briefcaseId } },
-                { $unwind: "$orders" },
-                {
-                    $match: { "orders.invoiceOrderItems": { $exists: true, $ne: [] } }
-                },
-                {
-                    $lookup: {
-                        from: "catalog",
-                        let: { productId: "$orders.invoiceOrderItems.productId" },
-                        pipeline: [
-                            {
-                                $match: {
-                                    $expr: {
-                                        $in: ["$_id", {
-                                                $map: {
-                                                    input: "$$productId",
-                                                    as: "pid",
-                                                    in: { $toObjectId: "$$pid" }
-                                                }
-                                            }]
-                                    }
-                                }
-                            },
-                            { $project: { sortValue: 1, view: 1, purchasePrice: 1 } }
-                        ],
-                        as: "catalogData"
-                    }
-                },
-                {
-                    $addFields: {
-                        "orders.invoiceOrderItems": {
-                            $map: {
-                                input: "$orders.invoiceOrderItems",
-                                as: "item",
-                                in: {
-                                    $mergeObjects: [
-                                        "$$item",
-                                        {
-                                            sortValue: {
-                                                $ifNull: [
-                                                    {
-                                                        $arrayElemAt: [
-                                                            {
-                                                                $map: {
-                                                                    input: {
-                                                                        $filter: {
-                                                                            input: "$catalogData",
-                                                                            as: "catalogItem",
-                                                                            cond: { $eq: ["$$catalogItem._id", { $toObjectId: "$$item.productId" }] }
-                                                                        }
-                                                                    },
-                                                                    as: "filteredCatalog",
-                                                                    in: "$$filteredCatalog.sortValue"
-                                                                }
-                                                            },
-                                                            0
-                                                        ]
-                                                    },
-                                                    0
-                                                ]
-                                            },
-                                            view: {
-                                                $ifNull: [
-                                                    {
-                                                        $arrayElemAt: [
-                                                            {
-                                                                $map: {
-                                                                    input: {
-                                                                        $filter: {
-                                                                            input: "$catalogData",
-                                                                            as: "catalogItem",
-                                                                            cond: { $eq: ["$$catalogItem._id", { $toObjectId: "$$item.productId" }] }
-                                                                        }
-                                                                    },
-                                                                    as: "filteredCatalog",
-                                                                    in: "$$filteredCatalog.view"
-                                                                }
-                                                            },
-                                                            0
-                                                        ]
-                                                    },
-                                                    null
-                                                ]
-                                            },
-                                            purchasePrice: {
-                                                $ifNull: [
-                                                    {
-                                                        $arrayElemAt: [
-                                                            {
-                                                                $map: {
-                                                                    input: {
-                                                                        $filter: {
-                                                                            input: "$catalogData",
-                                                                            as: "catalogItem",
-                                                                            cond: { $eq: ["$$catalogItem._id", { $toObjectId: "$$item.productId" }] }
-                                                                        }
-                                                                    },
-                                                                    as: "filteredCatalog",
-                                                                    in: "$$filteredCatalog.purchasePrice"
-                                                                }
-                                                            },
-                                                            0
-                                                        ]
-                                                    },
-                                                    0
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                },
-                {
-                    $group: {
-                        _id: "$_id",
-                        orders: { $push: "$orders" }
-                    }
-                }
-            ]).toArray();
+            const brief = yield privateReport_db_repositories_1.privateReportRepositories.getAggregateBriefcase(briefcaseId, deliveryRoutes);
             const viewData = {};
             const giftViewData = {};
             const discountData = {};

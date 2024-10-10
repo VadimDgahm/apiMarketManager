@@ -1,8 +1,8 @@
 import {UsersRepositories} from "../repositories/users-db-repositories";
 import bcrypt from "bcrypt";
 import ExcelJS from "exceljs";
-import {briefcaseCollection} from "../repositories/db";
 import {OrderItemsResponse} from "./invoices-service";
+import {privateReportRepositories} from "../repositories/privateReport-db-repositories";
 
 export const privateReportService = {
     async checkPrivatePass(userId: string, password: string) {
@@ -16,8 +16,8 @@ export const privateReportService = {
         return isPassEquals ? {success: true} : {success: false};
     },
 
-    async createPrivateReport(userId: string, idBriefcase: string) {
-        const data = await this.getTotalWeightByBriefcaseId(idBriefcase);
+    async createPrivateReport(userId: string, idBriefcase: string, deliveryRoutes ?: string[]) {
+        const data = await this.getTotalWeightByBriefcaseId(idBriefcase, deliveryRoutes);
         const workbook = new ExcelJS.Workbook();
 
         await generateWorksheet(data.data, workbook, 'Продажи', data.totalDelivery);
@@ -27,129 +27,8 @@ export const privateReportService = {
         return workbook;
     },
 
-    async getTotalWeightByBriefcaseId(briefcaseId: string) {
-        const brief = await briefcaseCollection.aggregate([
-            {$match: {id: briefcaseId}},
-            {$unwind: "$orders"},
-            {
-                $match: {"orders.invoiceOrderItems": {$exists: true, $ne: []}}
-            },
-            {
-                $lookup: {
-                    from: "catalog",
-                    let: {productId: "$orders.invoiceOrderItems.productId"},
-                    pipeline: [
-                        {
-                            $match: {
-                                $expr: {
-                                    $in: ["$_id", {
-                                        $map: {
-                                            input: "$$productId",
-                                            as: "pid",
-                                            in: {$toObjectId: "$$pid"}
-                                        }
-                                    }]
-                                }
-                            }
-                        },
-                        {$project: {sortValue: 1, view: 1, purchasePrice: 1}}
-                    ],
-                    as: "catalogData"
-                }
-            },
-            {
-                $addFields: {
-                    "orders.invoiceOrderItems": {
-                        $map: {
-                            input: "$orders.invoiceOrderItems",
-                            as: "item",
-                            in: {
-                                $mergeObjects: [
-                                    "$$item",
-                                    {
-                                        sortValue: {
-                                            $ifNull: [
-                                                {
-                                                    $arrayElemAt: [
-                                                        {
-                                                            $map: {
-                                                                input: {
-                                                                    $filter: {
-                                                                        input: "$catalogData",
-                                                                        as: "catalogItem",
-                                                                        cond: {$eq: ["$$catalogItem._id", {$toObjectId: "$$item.productId"}]}
-                                                                    }
-                                                                },
-                                                                as: "filteredCatalog",
-                                                                in: "$$filteredCatalog.sortValue"
-                                                            }
-                                                        },
-                                                        0
-                                                    ]
-                                                },
-                                                0
-                                            ]
-                                        },
-                                        view: {
-                                            $ifNull: [
-                                                {
-                                                    $arrayElemAt: [
-                                                        {
-                                                            $map: {
-                                                                input: {
-                                                                    $filter: {
-                                                                        input: "$catalogData",
-                                                                        as: "catalogItem",
-                                                                        cond: {$eq: ["$$catalogItem._id", {$toObjectId: "$$item.productId"}]}
-                                                                    }
-                                                                },
-                                                                as: "filteredCatalog",
-                                                                in: "$$filteredCatalog.view"
-                                                            }
-                                                        },
-                                                        0
-                                                    ]
-                                                },
-                                                null
-                                            ]
-                                        },
-                                        purchasePrice: {
-                                            $ifNull: [
-                                                {
-                                                    $arrayElemAt: [
-                                                        {
-                                                            $map: {
-                                                                input: {
-                                                                    $filter: {
-                                                                        input: "$catalogData",
-                                                                        as: "catalogItem",
-                                                                        cond: {$eq: ["$$catalogItem._id", {$toObjectId: "$$item.productId"}]}
-                                                                    }
-                                                                },
-                                                                as: "filteredCatalog",
-                                                                in: "$$filteredCatalog.purchasePrice"
-                                                            }
-                                                        },
-                                                        0
-                                                    ]
-                                                },
-                                                0
-                                            ]
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                }
-            },
-            {
-                $group: {
-                    _id: "$_id",
-                    orders: {$push: "$orders"}
-                }
-            }
-        ]).toArray();
+    async getTotalWeightByBriefcaseId(briefcaseId: string, deliveryRoutes ?: string[]) {
+        const brief = await privateReportRepositories.getAggregateBriefcase(briefcaseId, deliveryRoutes);
 
         const viewData: ViewDataMap = {};
         const giftViewData: ViewDataMap = {};

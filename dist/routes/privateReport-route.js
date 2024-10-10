@@ -26,7 +26,22 @@ exports.privateReportRoute.post('/check-pass', (req, res, next) => __awaiter(voi
 // @ts-ignore
 exports.privateReportRoute.get('/report/:idBriefcase', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const workbook = yield privateReport_service_1.privateReportService.createPrivateReport(req.user.id, req.params.idBriefcase);
+        const workbook = yield privateReport_service_1.privateReportService.createPrivateReport(req.user.id, req.params.idBriefcase, null);
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=private_report.xlsx');
+        yield workbook.xlsx.write(res);
+        res.end();
+    }
+    catch (e) {
+        next(e);
+    }
+}));
+// @ts-ignore
+exports.privateReportRoute.post('/select-report', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const workbook = yield privateReport_service_1.privateReportService.createPrivateReport(req.user.id, req.body.briefcaseId, req.body.routes);
+        const body = req.body;
+        console.log(body);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=private_report.xlsx');
         yield workbook.xlsx.write(res);
