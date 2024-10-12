@@ -46,7 +46,7 @@ exports.privateReportService = {
             const discountData = [];
             const totalDelivery = { amount: 0 };
             const addData = (data, item, discount) => {
-                var _a, _b;
+                var _a;
                 let objData = data.find((vData) => vData.view === item.view);
                 let index = 0;
                 if (!objData) {
@@ -56,15 +56,11 @@ exports.privateReportService = {
                     });
                     objData = data[index - 1];
                 }
-                let product;
                 if (item.isGift) {
-                    product = (_a = objData.products) === null || _a === void 0 ? void 0 : _a.find((prod) => prod.name === item.name && prod.productPrice === item.productPrice);
                     discount = 0;
                     item.productPrice = 0;
                 }
-                else {
-                    product = (_b = objData.products) === null || _b === void 0 ? void 0 : _b.find((prod) => prod.name === item.name && prod.productPrice === item.productPrice && prod.discount === discount);
-                }
+                const product = (_a = objData.products) === null || _a === void 0 ? void 0 : _a.find((prod) => prod.name === item.name && prod.productPrice === item.productPrice && prod.discount === discount);
                 if (!product) {
                     objData.products.push({
                         name: item.name,
