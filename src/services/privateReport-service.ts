@@ -48,12 +48,19 @@ export const privateReportService = {
                 objData = data[index - 1];
             }
 
-            const product = objData.products?.find(
-                (prod) => prod.name === item.name && prod.productPrice === item.productPrice && prod.discount === discount
-            );
+            let product: ProductReportData;
 
             if (item.isGift) {
+                product = objData.products?.find(
+                    (prod) => prod.name === item.name && prod.productPrice === item.productPrice
+                );
+
+                discount = 0;
                 item.productPrice = 0;
+            } else {
+                product = objData.products?.find(
+                    (prod) => prod.name === item.name && prod.productPrice === item.productPrice && prod.discount === discount
+                );
             }
 
             if (!product) {
