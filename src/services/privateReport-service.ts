@@ -20,7 +20,7 @@ export const privateReportService = {
         const data = await this.getTotalWeightByBriefcaseId(idBriefcase, deliveryRoutes);
         const workbook = new ExcelJS.Workbook();
 
-        await generateWorksheet(data.data, workbook, 'Продажи', data.totalDelivery);
+        await generateWorksheet(data.allData, workbook, 'Продажи', data.totalDelivery);
         await generateWorksheet(data.giftData, workbook, 'Подарки');
         await generateWorksheet(data.discountData, workbook, 'Скидки');
 
@@ -30,49 +30,55 @@ export const privateReportService = {
     async getTotalWeightByBriefcaseId(briefcaseId: string, deliveryRoutes ?: string[]) {
         const brief = await privateReportRepositories.getAggregateBriefcase(briefcaseId, deliveryRoutes);
 
-        const viewData: ViewDataMap = {};
-        const giftViewData: ViewDataMap = {};
-        const discountData: ViewDataMap = {};
+        const saleData: DataReport[] = [];
+        const giftViewData: DataReport[] = [];
+        const discountData: DataReport[] = [];
         const totalDelivery = {amount:0}
 
+        const addData = (data: DataReport[], item: OrderItemsResponse, discount: number) => {
+            let objData = data.find((vData) => vData.view === item.view);
+            let index = 0;
 
-        const addData = (data: ViewDataMap, item: OrderItemsResponse, config: Config = {
-            discount: 0,
-            isGift: false
-        }) => {
-            if (!data[item.view]) {
-                data[item.view] = {};
+            if (!objData) {
+                index = data.push({
+                    view: item.view,
+                    products: []
+                });
+
+                objData = data[index - 1];
             }
 
-            if (!data[item.view][item.name]) {
-                data[item.view][item.name] = {
-                    sortValue: item.sortValue || 0,
-                    weight: 0,
+            const product = objData.products?.find(
+                (prod) => prod.name === item.name && prod.productPrice === item.productPrice && prod.discount === discount
+            );
+
+            if (item.isGift) {
+                item.productPrice = 0;
+            }
+
+            if (!product) {
+                objData.products.push({
+                    name: item.name,
                     purchasePrice: item.purchasePrice,
-                    productPrice: item.productPrice
-                };
-
-                if (config.isGift) {
-                    data[item.view][item.name].productPrice = 0;
-                }
-
-                if (config.discount) {
-                    data[item.view][item.name].discount = config.discount;
-                }
+                    productPrice: item.productPrice,
+                    weight: item.weight,
+                    discount: discount,
+                    isGift: item.isGift
+                });
+            } else {
+                product.weight += item.weight;
             }
-
-            data[item.view][item.name].weight += item.weight;
         }
 
         for (const order of brief[0].orders) {
             if (order.invoiceOrderItems) {
                 for (const item of order.invoiceOrderItems) {
                     if (item.isGift) {
-                        addData(giftViewData, item, {isGift: true});
-                    } else if (order.discount) {
-                        addData(discountData, item, {discount: order.discount});
+                        addData(giftViewData, item, order.discount);
+                    } else if(order.discount) {
+                        addData(discountData, item, order.discount);
                     } else {
-                        addData(viewData, item);
+                        addData(saleData, item, order.discount);
                     }
                 }
 
@@ -86,68 +92,30 @@ export const privateReportService = {
             }
         }
 
-        const parseData = (data: ViewDataMap) => {
-            return Object.keys(data).map(view => ({
-                view,
-                products: Object.keys(data[view]).map(name => ({
-                    name,
-                    sortValue: data[view][name].sortValue,
-                    weight: data[view][name].weight,
-                    purchasePrice: data[view][name].purchasePrice,
-                    productPrice: data[view][name].productPrice,
-                    discount: data[view][name].discount ?? 0
-                })).sort((a, b) => a.sortValue - b.sortValue)
-            }))
-        }
+        function mergeData(arr1: DataReport[], arr2: DataReport[], arr3: DataReport[]): DataReport[] {
+            return [...arr1, ...arr2, ...arr3].reduce((acc: DataReport[], current) => {
+                const foundView = acc.find((item) => item.view === current.view);
 
-        const parseData3 = (data: ViewDataMap, gift: ViewDataMap, discountData: ViewDataMap) => {
-            return Object.keys(data).map(view => {
-                const res = {
-                    view,
-                    products: Object.keys(data[view]).map(name => ({
-                        name,
-                        sortValue: data[view][name].sortValue,
-                        weight: data[view][name].weight,
-                        purchasePrice: data[view][name].purchasePrice,
-                        productPrice: data[view][name].productPrice
-                    })).sort((a, b) => a.sortValue - b.sortValue)
+                if (foundView) {
+                    foundView.products.push(...current.products);
+                } else {
+                    acc.push({...current});
                 }
 
-                if (discountData[view]) {
-                    res.products.push(...Object.keys(discountData[view]).map(name => ({
-                        name,
-                        sortValue: discountData[view][name].sortValue,
-                        weight: discountData[view][name].weight,
-                        purchasePrice: discountData[view][name].purchasePrice,
-                        productPrice: discountData[view][name].productPrice,
-                        discount: discountData[view][name].discount ?? 0
-                    })));
-                }
-
-                if (gift[view]) {
-                    res.products.push(...Object.keys(gift[view]).map(name => ({
-                        name,
-                        sortValue: gift[view][name].sortValue,
-                        weight: gift[view][name].weight,
-                        purchasePrice: gift[view][name].purchasePrice,
-                        productPrice: gift[view][name].productPrice
-                    })));
-                }
-
-                return res;
-            })
+                return acc;
+            }, []);
         }
 
         return {
-            data: parseData3(viewData, giftViewData, discountData),
-            giftData: parseData(giftViewData),
-            discountData: parseData(discountData),
-            totalDelivery: totalDelivery.amount
-        };
+            allData: mergeData(saleData, discountData, giftViewData),
+            giftData: giftViewData,
+            discountData: discountData,
+            totalDelivery:totalDelivery.amount
+        }
     }
 };
 
-async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, nameWorksheet: string, totaldelivery = 0) {
+async function generateWorksheet(data: DataReport[], workbook: ExcelJS.Workbook, nameWorksheet: string, totalDelivery = 0) {
     const worksheet = workbook.addWorksheet(nameWorksheet);
 
     const border = {
@@ -182,7 +150,7 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
     };
 
 
-    data.forEach((viewData, viewIndex) => {
+    data.forEach((viewData) => {
         const {view, products} = viewData;
 
         const titleRow = worksheet.addRow([view]);
@@ -245,11 +213,13 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
 
         products.forEach((product, index) => {
             const {name, weight, purchasePrice, discount} = product;
+            let productPrice = product.productPrice;
+
             if (discount) {
-                product.productPrice *= (100 - discount) / 100;
+                productPrice *= (100 - discount) / 100;
                 countPromotions++
             }
-            const productPrice = product.productPrice;
+
             const purchaseSum = weight * purchasePrice;
             const salesSum = weight * productPrice;
             const markupValue = productPrice === 0 ? 0 : productPrice - purchasePrice;
@@ -353,33 +323,20 @@ async function generateWorksheet(data: dataExel[], workbook: ExcelJS.Workbook, n
     worksheet.addRow(['', 'Сумма подарков, руб: ', fullTotals.gifts]);
     worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit]);
     worksheet.addRow([]);
-    worksheet.addRow(['', 'Сумма за доставку, руб.: ', totaldelivery]);
-    worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit + totaldelivery]);
+    worksheet.addRow(['', 'Сумма за доставку, руб.: ', totalDelivery]);
+    worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit + totalDelivery]);
 }
 
-interface Config {
-    discount?: number;
-    isGift?: boolean;
-}
-
-interface dataExel {
-    view: string,
-    products: ProductData[]
-}
-
-interface ProductData {
-    name?: string;
-    sortValue: number;
+interface ProductReportData {
+    name: string;
     weight: number;
     purchasePrice: number;
     productPrice: number;
-    discount?: number;
+    discount: number;
+    isGift: boolean;
 }
 
-interface ViewData {
-    [name: string]: ProductData;
-}
-
-interface ViewDataMap {
-    [view: string]: ViewData;
+interface DataReport {
+    view: string;
+    products: ProductReportData[];
 }

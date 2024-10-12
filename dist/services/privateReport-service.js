@@ -32,7 +32,7 @@ exports.privateReportService = {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.getTotalWeightByBriefcaseId(idBriefcase, deliveryRoutes);
             const workbook = new exceljs_1.default.Workbook();
-            yield generateWorksheet(data.data, workbook, 'Продажи', data.totalDelivery);
+            yield generateWorksheet(data.allData, workbook, 'Продажи', data.totalDelivery);
             yield generateWorksheet(data.giftData, workbook, 'Подарки');
             yield generateWorksheet(data.discountData, workbook, 'Скидки');
             return workbook;
@@ -41,44 +41,50 @@ exports.privateReportService = {
     getTotalWeightByBriefcaseId(briefcaseId, deliveryRoutes) {
         return __awaiter(this, void 0, void 0, function* () {
             const brief = yield privateReport_db_repositories_1.privateReportRepositories.getAggregateBriefcase(briefcaseId, deliveryRoutes);
-            const viewData = {};
-            const giftViewData = {};
-            const discountData = {};
+            const saleData = [];
+            const giftViewData = [];
+            const discountData = [];
             const totalDelivery = { amount: 0 };
-            const addData = (data, item, config = {
-                discount: 0,
-                isGift: false
-            }) => {
-                if (!data[item.view]) {
-                    data[item.view] = {};
+            const addData = (data, item, discount) => {
+                var _a;
+                let objData = data.find((vData) => vData.view === item.view);
+                let index = 0;
+                if (!objData) {
+                    index = data.push({
+                        view: item.view,
+                        products: []
+                    });
+                    objData = data[index - 1];
                 }
-                if (!data[item.view][item.name]) {
-                    data[item.view][item.name] = {
-                        sortValue: item.sortValue || 0,
-                        weight: 0,
+                const product = (_a = objData.products) === null || _a === void 0 ? void 0 : _a.find((prod) => prod.name === item.name && prod.productPrice === item.productPrice && prod.discount === discount);
+                if (item.isGift) {
+                    item.productPrice = 0;
+                }
+                if (!product) {
+                    objData.products.push({
+                        name: item.name,
                         purchasePrice: item.purchasePrice,
-                        productPrice: item.productPrice
-                    };
-                    if (config.isGift) {
-                        data[item.view][item.name].productPrice = 0;
-                    }
-                    if (config.discount) {
-                        data[item.view][item.name].discount = config.discount;
-                    }
+                        productPrice: item.productPrice,
+                        weight: item.weight,
+                        discount: discount,
+                        isGift: item.isGift
+                    });
                 }
-                data[item.view][item.name].weight += item.weight;
+                else {
+                    product.weight += item.weight;
+                }
             };
             for (const order of brief[0].orders) {
                 if (order.invoiceOrderItems) {
                     for (const item of order.invoiceOrderItems) {
                         if (item.isGift) {
-                            addData(giftViewData, item, { isGift: true });
+                            addData(giftViewData, item, order.discount);
                         }
                         else if (order.discount) {
-                            addData(discountData, item, { discount: order.discount });
+                            addData(discountData, item, order.discount);
                         }
                         else {
-                            addData(viewData, item);
+                            addData(saleData, item, order.discount);
                         }
                     }
                     if (order.priceDelivery) {
@@ -91,69 +97,28 @@ exports.privateReportService = {
                     }
                 }
             }
-            const parseData = (data) => {
-                return Object.keys(data).map(view => ({
-                    view,
-                    products: Object.keys(data[view]).map(name => {
-                        var _a;
-                        return ({
-                            name,
-                            sortValue: data[view][name].sortValue,
-                            weight: data[view][name].weight,
-                            purchasePrice: data[view][name].purchasePrice,
-                            productPrice: data[view][name].productPrice,
-                            discount: (_a = data[view][name].discount) !== null && _a !== void 0 ? _a : 0
-                        });
-                    }).sort((a, b) => a.sortValue - b.sortValue)
-                }));
-            };
-            const parseData3 = (data, gift, discountData) => {
-                return Object.keys(data).map(view => {
-                    const res = {
-                        view,
-                        products: Object.keys(data[view]).map(name => ({
-                            name,
-                            sortValue: data[view][name].sortValue,
-                            weight: data[view][name].weight,
-                            purchasePrice: data[view][name].purchasePrice,
-                            productPrice: data[view][name].productPrice
-                        })).sort((a, b) => a.sortValue - b.sortValue)
-                    };
-                    if (discountData[view]) {
-                        res.products.push(...Object.keys(discountData[view]).map(name => {
-                            var _a;
-                            return ({
-                                name,
-                                sortValue: discountData[view][name].sortValue,
-                                weight: discountData[view][name].weight,
-                                purchasePrice: discountData[view][name].purchasePrice,
-                                productPrice: discountData[view][name].productPrice,
-                                discount: (_a = discountData[view][name].discount) !== null && _a !== void 0 ? _a : 0
-                            });
-                        }));
+            function mergeData(arr1, arr2, arr3) {
+                return [...arr1, ...arr2, ...arr3].reduce((acc, current) => {
+                    const foundView = acc.find((item) => item.view === current.view);
+                    if (foundView) {
+                        foundView.products.push(...current.products);
                     }
-                    if (gift[view]) {
-                        res.products.push(...Object.keys(gift[view]).map(name => ({
-                            name,
-                            sortValue: gift[view][name].sortValue,
-                            weight: gift[view][name].weight,
-                            purchasePrice: gift[view][name].purchasePrice,
-                            productPrice: gift[view][name].productPrice
-                        })));
+                    else {
+                        acc.push(Object.assign({}, current));
                     }
-                    return res;
-                });
-            };
+                    return acc;
+                }, []);
+            }
             return {
-                data: parseData3(viewData, giftViewData, discountData),
-                giftData: parseData(giftViewData),
-                discountData: parseData(discountData),
+                allData: mergeData(saleData, discountData, giftViewData),
+                giftData: giftViewData,
+                discountData: discountData,
                 totalDelivery: totalDelivery.amount
             };
         });
     }
 };
-function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
+function generateWorksheet(data, workbook, nameWorksheet, totalDelivery = 0) {
     return __awaiter(this, void 0, void 0, function* () {
         const worksheet = workbook.addWorksheet(nameWorksheet);
         const border = {
@@ -183,7 +148,7 @@ function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
             markupPercentWithAction: 0,
             gifts: 0
         };
-        data.forEach((viewData, viewIndex) => {
+        data.forEach((viewData) => {
             const { view, products } = viewData;
             const titleRow = worksheet.addRow([view]);
             titleRow.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
@@ -237,11 +202,11 @@ function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
             let totalMarkupPercentWithAction = 0;
             products.forEach((product, index) => {
                 const { name, weight, purchasePrice, discount } = product;
+                let productPrice = product.productPrice;
                 if (discount) {
-                    product.productPrice *= (100 - discount) / 100;
+                    productPrice *= (100 - discount) / 100;
                     countPromotions++;
                 }
-                const productPrice = product.productPrice;
                 const purchaseSum = weight * purchasePrice;
                 const salesSum = weight * productPrice;
                 const markupValue = productPrice === 0 ? 0 : productPrice - purchasePrice;
@@ -330,8 +295,8 @@ function generateWorksheet(data, workbook, nameWorksheet, totaldelivery = 0) {
         worksheet.addRow(['', 'Сумма подарков, руб: ', fullTotals.gifts]);
         worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit]);
         worksheet.addRow([]);
-        worksheet.addRow(['', 'Сумма за доставку, руб.: ', totaldelivery]);
-        worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit + totaldelivery]);
+        worksheet.addRow(['', 'Сумма за доставку, руб.: ', totalDelivery]);
+        worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit + totalDelivery]);
     });
 }
 //# sourceMappingURL=privateReport-service.js.map
