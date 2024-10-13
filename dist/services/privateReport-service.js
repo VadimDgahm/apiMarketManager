@@ -149,19 +149,27 @@ function generateWorksheet(data, workbook, nameWorksheet, totalDelivery = 0) {
             markupPercentWithAction: 0,
             gifts: 0
         };
-        data.forEach((viewData) => {
-            const { view, products } = viewData;
-            const titleRow = worksheet.addRow([view]);
-            titleRow.font = { bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
-            titleRow.alignment = {
+        const titleTable = {
+            font: {
+                bold: true,
+                size: 16,
+                color: { argb: 'FFFFFFFF' }
+            },
+            alignment: {
                 vertical: 'middle',
                 horizontal: 'center'
-            };
-            titleRow.getCell(1).fill = {
+            },
+            fill: {
                 type: 'pattern',
                 pattern: 'solid',
                 fgColor: { argb: '51382f' }
-            };
+            }
+        };
+        data.forEach((viewData) => {
+            const { view, products } = viewData;
+            const titleRow = worksheet.addRow([view]);
+            //@ts-ignore
+            titleRow.getCell(1).style = titleTable;
             const rowNumber = titleRow.number;
             worksheet.mergeCells(`${'A' + rowNumber}:${'J' + rowNumber}`);
             const headers = [
@@ -289,15 +297,30 @@ function generateWorksheet(data, workbook, nameWorksheet, totalDelivery = 0) {
             worksheet.addRow([]);
             worksheet.addRow([]);
         });
-        worksheet.addRow(['', 'Общая закупка, руб: ', fullTotals.purchases]);
-        worksheet.addRow(['', 'Общая продажа, руб: ', fullTotals.sales]);
-        worksheet.addRow(['', 'Общая наценка, %: ', +(fullTotals.markupPercent / data.length).toFixed(2)]);
-        worksheet.addRow(['', 'Общая наценка (акции), %: ', +(fullTotals.markupPercentWithAction / data.length).toFixed(2)]);
-        worksheet.addRow(['', 'Сумма подарков, руб: ', fullTotals.gifts]);
-        worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit]);
         worksheet.addRow([]);
-        worksheet.addRow(['', 'Сумма за доставку, руб.: ', totalDelivery]);
-        worksheet.addRow(['', 'Общая прибыль, руб.: ', fullTotals.profit + totalDelivery]);
+        const totalTitleRow = worksheet.addRow(['', 'Итоги недели']);
+        const rowNumber = totalTitleRow.number;
+        //@ts-ignore
+        totalTitleRow.getCell(2).style = titleTable;
+        worksheet.mergeCells(`${'B' + rowNumber}:${'C' + rowNumber}`);
+        const addStyledRow = (data) => {
+            const row = worksheet.addRow(data);
+            row.eachCell((cell, cellIndex) => {
+                if (cellIndex !== 1) {
+                    //@ts-ignore
+                    cell.style = rowStyle;
+                }
+            });
+        };
+        addStyledRow(['', 'Общая закупка, руб: ', fullTotals.purchases]);
+        addStyledRow(['', 'Общая продажа, руб: ', fullTotals.sales]);
+        addStyledRow(['', 'Общая наценка, %: ', +(fullTotals.markupPercent / data.length).toFixed(2)]);
+        addStyledRow(['', 'Общая наценка (акции), %: ', +(fullTotals.markupPercentWithAction / data.length).toFixed(2)]);
+        addStyledRow(['', 'Сумма подарков, руб: ', fullTotals.gifts]);
+        addStyledRow(['', 'Общая прибыль, руб.: ', fullTotals.profit]);
+        addStyledRow(['', '', '']);
+        addStyledRow(['', 'Сумма за доставку, руб.: ', totalDelivery]);
+        addStyledRow(['', 'Общая прибыль, руб.: ', fullTotals.profit + totalDelivery]);
     });
 }
 //# sourceMappingURL=privateReport-service.js.map
