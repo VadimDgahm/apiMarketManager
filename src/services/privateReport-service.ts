@@ -20,9 +20,9 @@ export const privateReportService = {
         const data = await this.getTotalWeightByBriefcaseId(idBriefcase, deliveryRoutes);
         const workbook = new ExcelJS.Workbook();
 
-        await generateWorksheet(data.allData, workbook, 'Продажи', data.totalDelivery);
-        await generateWorksheet(data.giftData, workbook, 'Подарки');
-        await generateWorksheet(data.discountData, workbook, 'Скидки');
+        await generateWorksheet(data.allData, workbook, 'Продажи', data.totalDelivery, data.totalOrders.sale);
+        await generateWorksheet(data.giftData, workbook, 'Подарки', 0, data.totalOrders.gift);
+        await generateWorksheet(data.discountData, workbook, 'Скидки', 0, data.totalOrders.discount);
 
         return workbook;
     },
@@ -34,6 +34,11 @@ export const privateReportService = {
         const giftViewData: DataReport[] = [];
         const discountData: DataReport[] = [];
         const totalDelivery = {amount:0}
+        const totalOrders = {
+            sale: 0,
+            gift: 0,
+            discount: 0,
+        };
 
         const addData = (data: DataReport[], item: OrderItemsResponse, discount: number) => {
             let objData = data.find((vData) => vData.view === item.view);
@@ -74,9 +79,12 @@ export const privateReportService = {
 
         for (const order of brief[0].orders) {
             if (order.invoiceOrderItems) {
+                let includesGift = false;
+
                 for (const item of order.invoiceOrderItems) {
                     if (item.isGift) {
                         addData(giftViewData, item, order.discount);
+                        includesGift = true;
                     } else if(order.discount) {
                         addData(discountData, item, order.discount);
                     } else {
@@ -90,6 +98,14 @@ export const privateReportService = {
                     } else {
                         totalDelivery.amount += +order.priceDelivery;
                     }
+                }
+
+                totalOrders.sale++;
+                if(includesGift) {
+                    totalOrders.gift++;
+                }
+                if(order.discount) {
+                    totalOrders.discount++;
                 }
             }
         }
@@ -112,12 +128,13 @@ export const privateReportService = {
             allData: mergeData(saleData, discountData, giftViewData),
             giftData: giftViewData,
             discountData: discountData,
-            totalDelivery:totalDelivery.amount
+            totalDelivery:totalDelivery.amount,
+            totalOrders: totalOrders
         }
     }
 };
 
-async function generateWorksheet(data: DataReport[], workbook: ExcelJS.Workbook, nameWorksheet: string, totalDelivery = 0) {
+async function generateWorksheet(data: DataReport[], workbook: ExcelJS.Workbook, nameWorksheet: string, totalDelivery = 0, totalOrders = 0) {
     const worksheet = workbook.addWorksheet(nameWorksheet);
 
     const border = {
@@ -142,15 +159,6 @@ async function generateWorksheet(data: DataReport[], workbook: ExcelJS.Workbook,
         border: border
     };
 
-    const fullTotals = {
-        purchases: 0,
-        sales: 0,
-        profit: 0,
-        markupPercent: 0,
-        markupPercentWithAction: 0,
-        gifts: 0
-    };
-
     const titleTable = {
         font: {
             bold: true,
@@ -166,6 +174,15 @@ async function generateWorksheet(data: DataReport[], workbook: ExcelJS.Workbook,
             pattern: 'solid',
             fgColor: { argb: '51382f' }
         }
+    };
+
+    const fullTotals = {
+        purchases: 0,
+        sales: 0,
+        profit: 0,
+        markupPercent: 0,
+        markupPercentWithAction: 0,
+        gifts: 0,
     };
 
     data.forEach((viewData) => {
@@ -345,6 +362,7 @@ async function generateWorksheet(data: DataReport[], workbook: ExcelJS.Workbook,
         });
     }
 
+    addStyledRow(['', 'Количество заказов: ', totalOrders]);
     addStyledRow(['', 'Общая закупка, руб: ', fullTotals.purchases]);
     addStyledRow(['', 'Общая продажа, руб: ', fullTotals.sales]);
     addStyledRow(['', 'Общая наценка, %: ', +(fullTotals.markupPercent / data.length).toFixed(2)]);

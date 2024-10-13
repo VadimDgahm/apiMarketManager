@@ -32,9 +32,9 @@ exports.privateReportService = {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.getTotalWeightByBriefcaseId(idBriefcase, deliveryRoutes);
             const workbook = new exceljs_1.default.Workbook();
-            yield generateWorksheet(data.allData, workbook, 'Продажи', data.totalDelivery);
-            yield generateWorksheet(data.giftData, workbook, 'Подарки');
-            yield generateWorksheet(data.discountData, workbook, 'Скидки');
+            yield generateWorksheet(data.allData, workbook, 'Продажи', data.totalDelivery, data.totalOrders.sale);
+            yield generateWorksheet(data.giftData, workbook, 'Подарки', 0, data.totalOrders.gift);
+            yield generateWorksheet(data.discountData, workbook, 'Скидки', 0, data.totalOrders.discount);
             return workbook;
         });
     },
@@ -45,6 +45,11 @@ exports.privateReportService = {
             const giftViewData = [];
             const discountData = [];
             const totalDelivery = { amount: 0 };
+            const totalOrders = {
+                sale: 0,
+                gift: 0,
+                discount: 0,
+            };
             const addData = (data, item, discount) => {
                 var _a;
                 let objData = data.find((vData) => vData.view === item.view);
@@ -77,9 +82,11 @@ exports.privateReportService = {
             };
             for (const order of brief[0].orders) {
                 if (order.invoiceOrderItems) {
+                    let includesGift = false;
                     for (const item of order.invoiceOrderItems) {
                         if (item.isGift) {
                             addData(giftViewData, item, order.discount);
+                            includesGift = true;
                         }
                         else if (order.discount) {
                             addData(discountData, item, order.discount);
@@ -95,6 +102,13 @@ exports.privateReportService = {
                         else {
                             totalDelivery.amount += +order.priceDelivery;
                         }
+                    }
+                    totalOrders.sale++;
+                    if (includesGift) {
+                        totalOrders.gift++;
+                    }
+                    if (order.discount) {
+                        totalOrders.discount++;
                     }
                 }
             }
@@ -114,12 +128,13 @@ exports.privateReportService = {
                 allData: mergeData(saleData, discountData, giftViewData),
                 giftData: giftViewData,
                 discountData: discountData,
-                totalDelivery: totalDelivery.amount
+                totalDelivery: totalDelivery.amount,
+                totalOrders: totalOrders
             };
         });
     }
 };
-function generateWorksheet(data, workbook, nameWorksheet, totalDelivery = 0) {
+function generateWorksheet(data, workbook, nameWorksheet, totalDelivery = 0, totalOrders = 0) {
     return __awaiter(this, void 0, void 0, function* () {
         const worksheet = workbook.addWorksheet(nameWorksheet);
         const border = {
@@ -141,14 +156,6 @@ function generateWorksheet(data, workbook, nameWorksheet, totalDelivery = 0) {
             alignment: { vertical: 'middle', horizontal: 'center' },
             border: border
         };
-        const fullTotals = {
-            purchases: 0,
-            sales: 0,
-            profit: 0,
-            markupPercent: 0,
-            markupPercentWithAction: 0,
-            gifts: 0
-        };
         const titleTable = {
             font: {
                 bold: true,
@@ -164,6 +171,14 @@ function generateWorksheet(data, workbook, nameWorksheet, totalDelivery = 0) {
                 pattern: 'solid',
                 fgColor: { argb: '51382f' }
             }
+        };
+        const fullTotals = {
+            purchases: 0,
+            sales: 0,
+            profit: 0,
+            markupPercent: 0,
+            markupPercentWithAction: 0,
+            gifts: 0,
         };
         data.forEach((viewData) => {
             const { view, products } = viewData;
@@ -312,6 +327,7 @@ function generateWorksheet(data, workbook, nameWorksheet, totalDelivery = 0) {
                 }
             });
         };
+        addStyledRow(['', 'Количество заказов: ', totalOrders]);
         addStyledRow(['', 'Общая закупка, руб: ', fullTotals.purchases]);
         addStyledRow(['', 'Общая продажа, руб: ', fullTotals.sales]);
         addStyledRow(['', 'Общая наценка, %: ', +(fullTotals.markupPercent / data.length).toFixed(2)]);
