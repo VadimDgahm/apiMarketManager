@@ -74,8 +74,6 @@ authRoute.get('/refresh',
     async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {accessToken, refreshToken} = req.cookies;
-            console.log('Access Token:', accessToken);
-            console.log('Refresh Token:', refreshToken);
 
            if(refreshToken){
             res.status(200).send({message: "Пользователь авторизован"})

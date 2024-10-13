@@ -79,8 +79,6 @@ exports.authRoute.get('/refresh', (req, res, next) => __awaiter(void 0, void 0, 
 exports.authRoute.get('/me', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { accessToken, refreshToken } = req.cookies;
-        console.log('Access Token:', accessToken);
-        console.log('Refresh Token:', refreshToken);
         if (refreshToken) {
             res.status(200).send({ message: "Пользователь авторизован" });
         }
