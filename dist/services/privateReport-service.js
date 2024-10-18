@@ -73,7 +73,8 @@ exports.privateReportService = {
                         productPrice: item.productPrice,
                         weight: item.weight,
                         discount: discount,
-                        isGift: item.isGift
+                        isGift: item.isGift,
+                        sortValue: item.sortValue
                     });
                 }
                 else {
@@ -124,6 +125,12 @@ exports.privateReportService = {
                     return acc;
                 }, []);
             }
+            function sortProducts(data) {
+                data.forEach(viewItem => viewItem.products.sort((a, b) => a.sortValue - b.sortValue));
+            }
+            sortProducts(saleData);
+            sortProducts(giftViewData);
+            sortProducts(discountData);
             return {
                 allData: mergeData(saleData, discountData, giftViewData),
                 giftData: giftViewData,
