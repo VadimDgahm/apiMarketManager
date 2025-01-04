@@ -18,7 +18,7 @@ exports.catalogService = {
             return yield catalog_db_repositories_1.catalogRepositories.getCatalog(userId);
         });
     },
-    createProduct({ name, type, userId, view, reductionName, price, sortValue, }) {
+    createProduct({ name, type, userId, view, reductionName, price, sortValue, typeReceipt }) {
         return __awaiter(this, void 0, void 0, function* () {
             const body = {
                 id: (0, uuid_1.v4)(),
@@ -29,6 +29,7 @@ exports.catalogService = {
                 reductionName,
                 price,
                 sortValue,
+                typeReceipt
             };
             return yield catalog_db_repositories_1.catalogRepositories.createProduct(body);
         });

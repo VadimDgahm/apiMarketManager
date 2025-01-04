@@ -16,6 +16,7 @@ export const catalogService = {
     reductionName,
     price,
     sortValue,
+    typeReceipt
   }: ProductTypeRequest) {
     const body: ProductType = {
       id: uuidv4(),
@@ -26,6 +27,7 @@ export const catalogService = {
       reductionName,
       price,
       sortValue,
+      typeReceipt
     };
     return await catalogRepositories.createProduct(body);
   },
@@ -49,6 +51,7 @@ export type ProductTypeRequest = {
   reductionName: string;
   price: number;
   sortValue: number;
+  typeReceipt: "ИП" | "СЗ";
 };
 
 export type ProductType = {
